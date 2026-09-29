@@ -1,1 +1,4 @@
 config/local.php
+# Volcados de base de datos: pueden contener datos personales de clientes.
+bade de datos/
+*.sql

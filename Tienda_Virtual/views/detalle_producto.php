@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/storefront_cart.php';
+require_once __DIR__ . '/../includes/storefront_ui.php';
 
 $requestedProductId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $requestedProductId = $requestedProductId ?: null;
@@ -13,180 +14,185 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $product = storefrontProduct($requestedProductId);
-$relatedProducts = $product ? storefrontRelatedProducts((int) $product['id_categoria'], (int) $product['id_producto'], 3) : [];
+$relatedProducts = $product ? storefrontRelatedProducts((int) $product['id_categoria'], (int) $product['id_producto'], 4) : [];
 
-$pageTitle = $product ? $product['nombre'] : 'Detalle del producto';
+$pageTitle = $product ? $product['nombre'] : 'Producto no disponible';
+if ($product) {
+    $pageDescription = storefrontExcerpt($product['descripcion'] ?? '', 155);
+    if (trim((string) ($product['descripcion'] ?? '')) === '') {
+        $pageDescription = $product['nombre'] . ' en Gerson\'s Store por ' . appMoney(storefrontProductCurrentPrice($product)) . '. Pide por WhatsApp.';
+    }
+    if (trim((string) ($product['url_imagen'] ?? '')) !== '') {
+        $pageImage = storefrontImageUrl($product['url_imagen']);
+    }
+}
 require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../includes/menu.php';
 ?>
 <?php if ($product): ?>
-    <?php $productImage = storefrontImageUrl($product['url_imagen'] ?? ''); ?>
-    <?php $hasPromotion = storefrontProductHasPromotion($product); ?>
-    <?php $discountPercent = storefrontProductDiscountPercent($product); ?>
-    <?php $hasStock = (int) ($product['stock_actual'] ?? 0) > 0; ?>
-    <section class="product-detail-layout">
-        <div class="product-gallery-panel">
-            <div class="thumb-list">
-                <?php if ($product['galeria'] !== []): ?>
-                    <?php foreach ($product['galeria'] as $index => $image): ?>
-                        <?php $galleryImage = storefrontImageUrl($image['url_imagen'] ?? ''); ?>
-                        <?php $isActiveThumb = $index === 0; ?>
-                        <button
-                            class="thumb-item <?php echo $isActiveThumb ? 'is-active' : ''; ?>"
-                            type="button"
-                            data-product-thumb
-                            data-gallery-src="<?php echo htmlspecialchars($galleryImage, ENT_QUOTES, 'UTF-8'); ?>"
-                            data-gallery-alt="Vista de <?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
-                            aria-label="Ver imagen <?php echo $index + 1; ?> de <?php echo count($product['galeria']); ?>"
-                            aria-pressed="<?php echo $isActiveThumb ? 'true' : 'false'; ?>"
-                        >
-                            <?php if ($galleryImage !== ''): ?>
-                                <img src="<?php echo htmlspecialchars($galleryImage, ENT_QUOTES, 'UTF-8'); ?>" alt="Vista de <?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?>">
-                            <?php else: ?>
-                                <span>Img</span>
-                            <?php endif; ?>
-                        </button>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="thumb-item thumb-item-empty"><span>Sin</span></div>
-                <?php endif; ?>
-            </div>
-            <div class="product-main-image">
+    <?php
+    $productImage = storefrontImageUrl($product['url_imagen'] ?? '');
+    $hasPromotion = storefrontProductHasPromotion($product);
+    $discountPercent = storefrontProductDiscountPercent($product);
+    $stock = max(0, (int) ($product['stock_actual'] ?? 0));
+    $hasStock = $stock > 0;
+    $gallery = array_values(array_filter(
+        $product['galeria'],
+        static fn(array $image): bool => trim((string) ($image['url_imagen'] ?? '')) !== ''
+    ));
+    $productWhatsappUrl = sfWhatsappUrl('Hola, me interesa el producto "' . $product['nombre'] . '" (' . $product['codigo_producto'] . ').');
+    ?>
+    <div class="sf-page-head sf-page-head-tight">
+        <nav class="sf-breadcrumb" aria-label="Ruta de navegación">
+            <ol>
+                <li><a href="<?php echo BASE_URL; ?>/index.php">Inicio</a></li>
+                <li><a href="<?php echo sfEscape(sfCategoryUrl((int) $product['id_categoria'])); ?>"><?php echo sfEscape($product['categoria_nombre']); ?></a></li>
+                <li aria-current="page"><?php echo sfEscape($product['nombre']); ?></li>
+            </ol>
+        </nav>
+    </div>
+
+    <article class="sf-product">
+        <div class="sf-gallery">
+            <div class="sf-gallery-main">
                 <?php if ($productImage !== ''): ?>
                     <img
-                        src="<?php echo htmlspecialchars($productImage, ENT_QUOTES, 'UTF-8'); ?>"
-                        alt="<?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
+                        src="<?php echo sfEscape($productImage); ?>"
+                        alt="<?php echo sfEscape($product['nombre']); ?>"
+                        fetchpriority="high"
+                        decoding="async"
+                        width="900"
+                        height="900"
                         data-product-main-image
                     >
                 <?php else: ?>
-                    <div class="shop-card-placeholder large-placeholder">
-                        <span><?php echo htmlspecialchars(storefrontInitial($product['categoria_nombre']), ENT_QUOTES, 'UTF-8'); ?></span>
-                    </div>
+                    <span class="sf-card-placeholder"><?php echo sfEscape(storefrontInitial($product['categoria_nombre'])); ?></span>
+                <?php endif; ?>
+                <?php if ($discountPercent !== null): ?>
+                    <span class="sf-badge sf-badge-sale sf-gallery-badge">-<?php echo $discountPercent; ?>%</span>
                 <?php endif; ?>
             </div>
-        </div>
-
-        <aside class="product-info-panel">
-            <h1 class="product-detail-title"><?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?></h1>
-            <div class="product-detail-meta">
-                <span><?php echo htmlspecialchars($product['categoria_nombre'], ENT_QUOTES, 'UTF-8'); ?></span>
-                <span>SKU: <?php echo htmlspecialchars($product['codigo_producto'], ENT_QUOTES, 'UTF-8'); ?></span>
-            </div>
-            <div class="product-price-box">
-                <span><?php echo $hasPromotion ? htmlspecialchars((string) ($product['texto_promocion'] ?: 'Precio promocional'), ENT_QUOTES, 'UTF-8') : 'Precio'; ?></span>
-                <strong><?php echo htmlspecialchars(appMoney((float) storefrontProductCurrentPrice($product)), ENT_QUOTES, 'UTF-8'); ?></strong>
-                <?php if (!$hasStock): ?>
-                    <div class="storefront-stock-badge">Proximamente</div>
-                <?php endif; ?>
-                <?php if ($hasPromotion): ?>
-                    <?php if ($discountPercent !== null): ?>
-                        <div class="storefront-discount-badge">-<?php echo $discountPercent; ?>% de descuento</div>
-                    <?php endif; ?>
-                    <div class="shop-price-original">Antes: <?php echo htmlspecialchars(appMoney((float) $product['precio_venta']), ENT_QUOTES, 'UTF-8'); ?></div>
-                <?php endif; ?>
-            </div>
-            <form method="post" action="" class="product-purchase-form">
-                <input type="hidden" name="product_id" value="<?php echo (int) $product['id_producto']; ?>">
-                <div class="quantity-block">
-                    <span>Cantidad:</span>
-                    <div class="quantity-selector" data-quantity-selector>
-                        <button type="button" data-quantity-decrease <?php echo !$hasStock ? 'disabled' : ''; ?>>-</button>
-                        <input
-                            type="number"
-                            name="quantity"
-                            value="1"
-                            min="1"
-                            max="<?php echo max(1, (int) $product['stock_actual']); ?>"
-                            data-quantity-input
-                            <?php echo !$hasStock ? 'disabled' : ''; ?>
+            <?php if (count($gallery) > 1): ?>
+                <div class="sf-gallery-thumbs" role="group" aria-label="Imágenes del producto">
+                    <?php foreach ($gallery as $index => $image): ?>
+                        <?php $galleryImage = storefrontImageUrl($image['url_imagen'] ?? ''); ?>
+                        <button
+                            class="sf-thumb<?php echo $index === 0 ? ' is-active' : ''; ?>"
+                            type="button"
+                            data-product-thumb
+                            data-gallery-src="<?php echo sfEscape($galleryImage); ?>"
+                            data-gallery-alt="<?php echo sfEscape($product['nombre']); ?>, imagen <?php echo $index + 1; ?>"
+                            aria-label="Ver imagen <?php echo $index + 1; ?> de <?php echo count($gallery); ?>"
+                            aria-pressed="<?php echo $index === 0 ? 'true' : 'false'; ?>"
                         >
-                        <button type="button" data-quantity-increase <?php echo !$hasStock ? 'disabled' : ''; ?>>+</button>
-                    </div>
+                            <img src="<?php echo sfEscape($galleryImage); ?>" alt="" loading="lazy" decoding="async" width="120" height="120">
+                        </button>
+                    <?php endforeach; ?>
                 </div>
-                <div class="product-note-box">
-                    <strong><?php echo $hasStock ? 'Disponible para compra' : 'Disponible proximamente'; ?></strong>
-                    <p><?php echo $hasStock ? 'Puedes añadir este producto al carrito y continuar con tu pedido.' : 'Este producto se mantiene visible para futuras ventas y volverá a estar disponible pronto.'; ?></p>
-                </div>
-                <div class="detail-actions">
-                    <button class="button button-primary" type="submit" <?php echo !$hasStock ? 'disabled' : ''; ?>><?php echo $hasStock ? 'Añadir al carrito' : 'Proximamente'; ?></button>
-                    <a class="button button-secondary" href="<?php echo BASE_URL; ?>/views/catalogo.php">Seguir comprando</a>
-                </div>
-            </form>
-        </aside>
-    </section>
+            <?php endif; ?>
+        </div>
 
-    <section class="detail-lower-grid">
-        <div class="page-section product-description-panel">
-            <h2 class="section-title">Descripcion</h2>
-            <p><?php echo nl2br(htmlspecialchars((string) ($product['descripcion'] ?: 'Agrega una descripcion comercial completa para este producto.'), ENT_QUOTES, 'UTF-8')); ?></p>
-        </div>
-        <div class="page-section product-extra-panel">
-            <h2 class="section-title">Informacion del producto</h2>
-            <ul class="detail-list">
-                <li>Categoria: <?php echo htmlspecialchars($product['categoria_nombre'], ENT_QUOTES, 'UTF-8'); ?></li>
-                <li>Codigo: <?php echo htmlspecialchars($product['codigo_producto'], ENT_QUOTES, 'UTF-8'); ?></li>
-                <li>Disponibilidad: <?php echo $hasStock ? 'Disponible' : 'Proximamente'; ?></li>
+        <div class="sf-product-info">
+            <a class="sf-eyebrow sf-eyebrow-link" href="<?php echo sfEscape(sfCategoryUrl((int) $product['id_categoria'])); ?>"><?php echo sfEscape($product['categoria_nombre']); ?></a>
+            <h1 class="sf-product-title"><?php echo sfEscape($product['nombre']); ?></h1>
+            <span class="sf-product-sku">SKU: <?php echo sfEscape($product['codigo_producto']); ?></span>
+
+            <div class="sf-product-price">
+                <div class="sf-price sf-price-lg">
+                    <span class="sf-price-current<?php echo $hasPromotion ? ' is-sale' : ''; ?>"><?php echo sfEscape(appMoney(storefrontProductCurrentPrice($product))); ?></span>
+                    <?php if ($hasPromotion): ?>
+                        <s class="sf-price-old"><span class="sf-visually-hidden">Antes: </span><?php echo sfEscape(appMoney((float) $product['precio_venta'])); ?></s>
+                    <?php endif; ?>
+                </div>
+                <?php if ($hasPromotion): ?>
+                    <span class="sf-product-promo"><?php echo sfIcon('tag', 'sf-icon sf-icon-xs'); ?><?php echo sfEscape((string) ($product['texto_promocion'] ?: 'Precio promocional')); ?><?php if ($discountPercent !== null): ?> · Ahorras <?php echo $discountPercent; ?>%<?php endif; ?></span>
+                <?php endif; ?>
+            </div>
+
+            <p class="sf-stock sf-stock-lg <?php echo $hasStock ? ($stock <= 3 ? 'is-low' : 'is-ok') : 'is-out'; ?>">
+                <?php if (!$hasStock): ?>
+                    Sin stock por ahora · volverá pronto
+                <?php elseif ($stock <= 3): ?>
+                    ¡Últimas unidades! Quedan <?php echo $stock; ?>
+                <?php else: ?>
+                    Disponible para pedido
+                <?php endif; ?>
+            </p>
+
+            <form method="post" action="" class="sf-buy" data-add-to-cart data-product-name="<?php echo sfEscape($product['nombre']); ?>">
+                <input type="hidden" name="product_id" value="<?php echo (int) $product['id_producto']; ?>">
+                <div class="sf-qty" data-quantity-selector>
+                    <button type="button" data-quantity-decrease aria-label="Restar una unidad" <?php echo !$hasStock ? 'disabled' : ''; ?>><?php echo sfIcon('minus'); ?></button>
+                    <input
+                        type="number"
+                        name="quantity"
+                        value="1"
+                        min="1"
+                        max="<?php echo max(1, $stock); ?>"
+                        inputmode="numeric"
+                        aria-label="Cantidad"
+                        data-quantity-input
+                        <?php echo !$hasStock ? 'disabled' : ''; ?>
+                    >
+                    <button type="button" data-quantity-increase aria-label="Sumar una unidad" <?php echo !$hasStock ? 'disabled' : ''; ?>><?php echo sfIcon('plus'); ?></button>
+                </div>
+                <button class="sf-button sf-button-primary sf-button-lg sf-buy-button" type="submit" <?php echo !$hasStock ? 'disabled' : ''; ?>>
+                    <?php echo sfIcon('bag'); ?><span data-button-label><?php echo $hasStock ? 'Añadir al carrito' : 'Próximamente'; ?></span>
+                </button>
+            </form>
+
+            <ul class="sf-product-perks">
+                <li><?php echo sfIcon('chat'); ?><span><strong>Pedido por WhatsApp.</strong> Confirmas detalles y entrega directamente con la tienda.</span></li>
+                <li><?php echo sfIcon('truck'); ?><span><strong>Entrega:</strong> <?php echo sfEscape(implode(', ', storefrontCartDeliveryMethods())); ?>.</span></li>
             </ul>
+
+            <div class="sf-product-links">
+                <a class="sf-link-arrow" href="<?php echo sfEscape(sfCategoryUrl((int) $product['id_categoria'])); ?>"><?php echo sfIcon('arrow-left'); ?>Seguir viendo <?php echo sfEscape($product['categoria_nombre']); ?></a>
+                <?php if ($productWhatsappUrl): ?>
+                    <a class="sf-link-arrow" href="<?php echo sfEscape($productWhatsappUrl); ?>" target="_blank" rel="noopener"><?php echo sfIcon('chat'); ?>Preguntar por este producto</a>
+                <?php endif; ?>
+            </div>
         </div>
+    </article>
+
+    <section class="sf-section sf-product-details" aria-labelledby="sf-desc-title">
+        <div class="sf-product-desc" data-reveal>
+            <h2 class="sf-section-title sf-section-title-sm" id="sf-desc-title">Descripción</h2>
+            <?php if (trim((string) ($product['descripcion'] ?? '')) !== ''): ?>
+                <p><?php echo nl2br(sfEscape((string) $product['descripcion'])); ?></p>
+            <?php else: ?>
+                <p>Este producto todavía no tiene una descripción detallada. Si tienes dudas, escríbenos por WhatsApp.</p>
+            <?php endif; ?>
+        </div>
+        <dl class="sf-spec" data-reveal style="--i: 1">
+            <div><dt>Categoría</dt><dd><?php echo sfEscape($product['categoria_nombre']); ?></dd></div>
+            <div><dt>Código</dt><dd><?php echo sfEscape($product['codigo_producto']); ?></dd></div>
+            <div><dt>Disponibilidad</dt><dd><?php echo $hasStock ? 'Disponible' : 'Próximamente'; ?></dd></div>
+        </dl>
     </section>
 
     <?php if ($relatedProducts !== []): ?>
-        <section class="store-collection compact-top">
-            <div class="section-heading section-heading-inline">
+        <section class="sf-section" aria-labelledby="sf-related-title">
+            <div class="sf-section-head" data-reveal>
                 <div>
-                    <h2 class="section-title">Te recomendamos estos productos</h2>
+                    <span class="sf-eyebrow">También en <?php echo sfEscape($product['categoria_nombre']); ?></span>
+                    <h2 class="sf-section-title" id="sf-related-title">Te puede interesar</h2>
                 </div>
+                <a class="sf-link-arrow" href="<?php echo sfEscape(sfCategoryUrl((int) $product['id_categoria'])); ?>">Ver todo<?php echo sfIcon('arrow-right'); ?></a>
             </div>
-            <div class="mobile-scroll-hint">Desliza para ver más</div>
-            <div class="collection-grid catalog-grid">
-                <?php foreach ($relatedProducts as $relatedProduct): ?>
-                    <?php $relatedImage = storefrontImageUrl($relatedProduct['url_imagen'] ?? ''); ?>
-                    <?php $relatedHasPromotion = storefrontProductHasPromotion($relatedProduct); ?>
-                    <?php $relatedDiscountPercent = storefrontProductDiscountPercent($relatedProduct); ?>
-                    <article class="shop-card">
-                        <a class="shop-card-media" href="<?php echo BASE_URL; ?>/views/detalle_producto.php?id=<?php echo (int) $relatedProduct['id_producto']; ?>">
-                            <?php if ($relatedImage !== ''): ?>
-                                <img src="<?php echo htmlspecialchars($relatedImage, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($relatedProduct['nombre'], ENT_QUOTES, 'UTF-8'); ?>">
-                            <?php else: ?>
-                                <div class="shop-card-placeholder">
-                                    <span><?php echo htmlspecialchars(storefrontInitial($relatedProduct['categoria_nombre']), ENT_QUOTES, 'UTF-8'); ?></span>
-                                </div>
-                            <?php endif; ?>
-                        </a>
-                        <div class="shop-card-body">
-                            <span class="shop-card-sku">SKU: <?php echo htmlspecialchars($relatedProduct['codigo_producto'], ENT_QUOTES, 'UTF-8'); ?></span>
-                            <?php if ($relatedHasPromotion): ?>
-                                <div class="storefront-promo-headline">
-                                    <span class="storefront-promo-tag"><?php echo htmlspecialchars((string) ($relatedProduct['texto_promocion'] ?: 'Oferta'), ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php if ($relatedDiscountPercent !== null): ?>
-                                        <span class="storefront-discount-badge">-<?php echo $relatedDiscountPercent; ?>%</span>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
-                            <h3><a href="<?php echo BASE_URL; ?>/views/detalle_producto.php?id=<?php echo (int) $relatedProduct['id_producto']; ?>"><?php echo htmlspecialchars($relatedProduct['nombre'], ENT_QUOTES, 'UTF-8'); ?></a></h3>
-                            <div class="shop-card-footer">
-                                <div class="storefront-price-stack">
-                                    <span class="shop-price"><?php echo htmlspecialchars(appMoney((float) storefrontProductCurrentPrice($relatedProduct)), ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php if ($relatedHasPromotion): ?>
-                                        <span class="shop-price-original"><?php echo htmlspecialchars(appMoney((float) $relatedProduct['precio_venta']), ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php endif; ?>
-                                </div>
-                                <a class="inline-link" href="<?php echo BASE_URL; ?>/views/detalle_producto.php?id=<?php echo (int) $relatedProduct['id_producto']; ?>">Ver detalle</a>
-                            </div>
-                        </div>
-                    </article>
+            <div class="sf-product-grid">
+                <?php foreach ($relatedProducts as $index => $relatedProduct): ?>
+                    <?php echo sfRenderProductCard($relatedProduct, ['index' => $index]); ?>
                 <?php endforeach; ?>
             </div>
         </section>
     <?php endif; ?>
 <?php else: ?>
-    <section class="page-section empty-state">
-        <span class="eyebrow eyebrow-dark">Sin producto activo</span>
-        <strong>No hay un producto disponible para renderizar el detalle todavía.</strong>
-        <p>Cuando registres al menos un producto activo, esta página tomará los datos reales, incluyendo categoría, precio, stock e imágenes.</p>
-        <div class="action-row">
-            <a class="button button-primary" href="<?php echo BASE_URL; ?>/views/catalogo.php">Ir al catalogo</a>
-            <a class="button button-secondary" href="<?php echo BASE_URL; ?>/admin/productos/index.php">Ver modulo productos</a>
+    <section class="sf-section">
+        <div class="sf-empty">
+            <strong>Este producto no está disponible.</strong>
+            <p>Puede que se haya retirado del catálogo o que el enlace no sea correcto.</p>
+            <a class="sf-button sf-button-primary" href="<?php echo BASE_URL; ?>/views/catalogo.php">Ir al catálogo</a>
         </div>
     </section>
 <?php endif; ?>

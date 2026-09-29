@@ -219,37 +219,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    document.querySelectorAll('[data-catalog-grid]').forEach(function (grid) {
-        var cards = Array.from(grid.querySelectorAll('[data-reveal-card]'));
-
-        if ('IntersectionObserver' in window) {
-            var observer = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (!entry.isIntersecting) {
-                        return;
-                    }
-
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target);
-                });
-            }, {
-                rootMargin: '0px 0px -10% 0px',
-                threshold: 0.12,
-            });
-
-            cards.forEach(function (card, index) {
-                card.style.transitionDelay = Math.min(index, 8) * 40 + 'ms';
-                observer.observe(card);
-            });
-
-            return;
-        }
-
-        cards.forEach(function (card) {
-            card.classList.add('is-visible');
-        });
-    });
-
     document.querySelectorAll('[data-admin-preview-toggle]').forEach(function (button) {
         var panelId = button.getAttribute('aria-controls');
         var panel = panelId ? document.getElementById(panelId) : null;

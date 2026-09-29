@@ -368,7 +368,8 @@ function storefrontCartSummary(): array
             $hasChanges = true;
         }
 
-        $price = (float) ($product['precio_venta'] ?? 0);
+        // Mismo precio que ve el cliente en tarjeta y detalle (promocional si aplica).
+        $price = storefrontProductCurrentPrice($product);
         $lineTotal = $price * $quantity;
         $subtotal += $lineTotal;
         $count += $quantity;

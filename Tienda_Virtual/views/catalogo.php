@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../includes/storefront_data.php';
+require_once __DIR__ . '/../includes/storefront_cart.php';
+require_once __DIR__ . '/../includes/storefront_ui.php';
 
 $selectedCategory = filter_input(INPUT_GET, 'categoria', FILTER_VALIDATE_INT);
 $selectedCategory = $selectedCategory ?: null;
@@ -32,21 +33,21 @@ $showTo = min($offset + $perPage, $totalProducts);
 
 $activeFilters = [];
 if ($search !== '') {
-    $activeFilters[] = ['label' => 'Busqueda: ' . $search, 'remove' => 'buscar'];
+    $activeFilters[] = ['label' => 'Búsqueda: ' . $search, 'remove' => 'buscar'];
 }
 if ($selectedCategory !== null) {
     foreach ($categories as $cat) {
         if ((int) $cat['id_categoria'] === $selectedCategory) {
-            $activeFilters[] = ['label' => 'Categoria: ' . $cat['nombre'], 'remove' => 'categoria'];
+            $activeFilters[] = ['label' => 'Categoría: ' . $cat['nombre'], 'remove' => 'categoria'];
             break;
         }
     }
 }
 if ($filterPriceMin !== null) {
-    $activeFilters[] = ['label' => 'Precio min: ' . appMoney($filterPriceMin, 0), 'remove' => 'precio_min'];
+    $activeFilters[] = ['label' => 'Precio mín: ' . appMoney($filterPriceMin, 0), 'remove' => 'precio_min'];
 }
 if ($filterPriceMax !== null) {
-    $activeFilters[] = ['label' => 'Precio max: ' . appMoney($filterPriceMax, 0), 'remove' => 'precio_max'];
+    $activeFilters[] = ['label' => 'Precio máx: ' . appMoney($filterPriceMax, 0), 'remove' => 'precio_max'];
 }
 if ($filterInStock) {
     $activeFilters[] = ['label' => 'Solo con stock', 'remove' => 'en_stock'];
@@ -105,265 +106,222 @@ foreach ($categories as $category) {
 }
 
 $sortLabels = [
-    'recent' => 'Mas recientes',
+    'recent' => 'Más recientes',
     'price_asc' => 'Precio: menor a mayor',
     'price_desc' => 'Precio: mayor a menor',
     'name_asc' => 'Nombre A-Z',
-    'stock_desc' => 'Mas stock',
+    'stock_desc' => 'Más stock',
 ];
 
-$pageTitle = 'Catalogo';
+$catalogHeading = $filterOnSale && $selectedCategory === null && $search === '' ? 'Ofertas' : $selectedCategoryName;
+$pageTitle = $search !== '' ? 'Resultados para "' . $search . '"' : $catalogHeading;
+$pageDescription = $selectedCategory !== null
+    ? 'Compra ' . $selectedCategoryName . ' en Gerson\'s Store. Precios en Lempiras, ofertas y pedido por WhatsApp.'
+    : 'Catálogo completo de Gerson\'s Store: joyería, perfumes y regalos con filtros por precio, disponibilidad y ofertas.';
+$sidebarFilterCount = ($filterPriceMin !== null ? 1 : 0) + ($filterPriceMax !== null ? 1 : 0) + ($filterInStock ? 1 : 0) + ($filterOnSale ? 1 : 0);
 require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../includes/menu.php';
 ?>
-<section class="page-section catalog-hero">
-    <div class="catalog-hero-copy">
-        <span class="section-label">Catalogo</span>
-        <h1 class="page-title catalog-title"><?php echo htmlspecialchars($selectedCategoryName, ENT_QUOTES, 'UTF-8'); ?></h1>
-        <p class="lead">
-            <?php if ($search !== ''): ?>
-                Resultados para <strong><?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?></strong>.
+<div class="sf-page-head">
+    <nav class="sf-breadcrumb" aria-label="Ruta de navegación">
+        <ol>
+            <li><a href="<?php echo BASE_URL; ?>/index.php">Inicio</a></li>
+            <?php if ($selectedCategory !== null || $filterOnSale || $search !== ''): ?>
+                <li><a href="<?php echo BASE_URL; ?>/views/catalogo.php">Catálogo</a></li>
+                <li aria-current="page"><?php echo sfEscape($search !== '' ? 'Búsqueda' : $catalogHeading); ?></li>
             <?php else: ?>
-                Explora y filtra todos nuestros productos.
+                <li aria-current="page">Catálogo</li>
             <?php endif; ?>
-        </p>
+        </ol>
+    </nav>
+    <div class="sf-page-head-row">
+        <div>
+            <h1 class="sf-page-title"><?php echo sfEscape($catalogHeading); ?></h1>
+            <p class="sf-page-lead">
+                <?php if ($search !== ''): ?>
+                    <?php echo $totalProducts; ?> resultado<?php echo $totalProducts === 1 ? '' : 's'; ?> para <strong>“<?php echo sfEscape($search); ?>”</strong>
+                <?php else: ?>
+                    <?php echo $totalProducts; ?> producto<?php echo $totalProducts === 1 ? '' : 's'; ?> disponibles para explorar
+                <?php endif; ?>
+            </p>
+        </div>
     </div>
-    <form class="catalog-filters" action="" method="get" data-catalog-form>
-        <input type="search" name="buscar" value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Buscar producto o codigo...">
-        <select name="categoria">
-            <option value="">Todas las categorias</option>
+</div>
+
+<form class="sf-toolbar" action="" method="get" data-catalog-form>
+    <label class="sf-field sf-field-search">
+        <span class="sf-visually-hidden">Buscar en el catálogo</span>
+        <?php echo sfIcon('search', 'sf-icon sf-field-icon'); ?>
+        <input type="search" name="buscar" value="<?php echo sfEscape($search); ?>" placeholder="Buscar producto o código">
+    </label>
+    <label class="sf-field">
+        <span class="sf-visually-hidden">Categoría</span>
+        <select name="categoria" data-catalog-auto-submit>
+            <option value="">Todas las categorías</option>
             <?php foreach ($categories as $category): ?>
-                <option value="<?php echo (int) $category['id_categoria']; ?>" <?php echo (int) $category['id_categoria'] === $selectedCategory ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($category['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                </option>
+                <option value="<?php echo (int) $category['id_categoria']; ?>" <?php echo (int) $category['id_categoria'] === $selectedCategory ? 'selected' : ''; ?>><?php echo sfEscape($category['nombre']); ?></option>
             <?php endforeach; ?>
         </select>
+    </label>
+    <label class="sf-field">
+        <span class="sf-visually-hidden">Ordenar por</span>
         <select name="orden" data-catalog-auto-submit>
             <?php foreach ($sortLabels as $key => $label): ?>
-                <option value="<?php echo $key; ?>" <?php echo $sort === $key ? 'selected' : ''; ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
+                <option value="<?php echo $key; ?>" <?php echo $sort === $key ? 'selected' : ''; ?>><?php echo sfEscape($label); ?></option>
             <?php endforeach; ?>
         </select>
+    </label>
+    <label class="sf-field sf-field-compact">
+        <span class="sf-visually-hidden">Productos por página</span>
         <select name="por_pagina" data-catalog-auto-submit>
             <?php foreach ($allowedPerPage as $size): ?>
-                <option value="<?php echo $size; ?>" <?php echo $perPage === $size ? 'selected' : ''; ?>><?php echo $size; ?> por pagina</option>
+                <option value="<?php echo $size; ?>" <?php echo $perPage === $size ? 'selected' : ''; ?>><?php echo $size; ?> por página</option>
             <?php endforeach; ?>
         </select>
-        <button class="button button-primary" type="submit">Buscar</button>
-    </form>
-</section>
+    </label>
+    <?php if ($filterPriceMin !== null): ?><input type="hidden" name="precio_min" value="<?php echo $filterPriceMin; ?>"><?php endif; ?>
+    <?php if ($filterPriceMax !== null): ?><input type="hidden" name="precio_max" value="<?php echo $filterPriceMax; ?>"><?php endif; ?>
+    <?php if ($filterInStock): ?><input type="hidden" name="en_stock" value="1"><?php endif; ?>
+    <?php if ($filterOnSale): ?><input type="hidden" name="en_oferta" value="1"><?php endif; ?>
+    <button class="sf-button sf-button-primary" type="submit">Buscar</button>
+</form>
 
-<div class="catalog-layout">
-
-    <!-- =============== SIDEBAR =============== -->
-    <aside class="catalog-sidebar" data-catalog-sidebar>
-        <div class="sidebar-panel">
-            <div class="sidebar-panel-head">
-                <strong>Filtros</strong>
-                <?php if ($activeFilters !== []): ?>
-                    <a class="sidebar-clear-all" href="<?php echo BASE_URL; ?>/views/catalogo.php">Limpiar todo</a>
-                <?php endif; ?>
-            </div>
-
-            <form class="sidebar-form" action="" method="get" data-catalog-sidebar-form>
-                <?php if ($search !== ''): ?><input type="hidden" name="buscar" value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
+<div class="sf-catalog">
+    <aside class="sf-filters" aria-label="Filtros">
+        <details class="sf-filters-panel" data-filters-panel open>
+            <summary class="sf-filters-summary">
+                <span><?php echo sfIcon('filter'); ?>Filtros<?php if ($sidebarFilterCount > 0): ?> <b class="sf-filters-count"><?php echo $sidebarFilterCount; ?></b><?php endif; ?></span>
+                <?php echo sfIcon('chevron-right', 'sf-icon sf-filters-chevron'); ?>
+            </summary>
+            <form class="sf-filters-form" action="" method="get" data-catalog-sidebar-form>
+                <?php if ($search !== ''): ?><input type="hidden" name="buscar" value="<?php echo sfEscape($search); ?>"><?php endif; ?>
                 <?php if ($selectedCategory !== null && $selectedCategory > 0): ?><input type="hidden" name="categoria" value="<?php echo $selectedCategory; ?>"><?php endif; ?>
                 <?php if ($perPage !== 24): ?><input type="hidden" name="por_pagina" value="<?php echo $perPage; ?>"><?php endif; ?>
-                <?php if ($sort !== 'recent'): ?><input type="hidden" name="orden" value="<?php echo htmlspecialchars($sort, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
+                <?php if ($sort !== 'recent'): ?><input type="hidden" name="orden" value="<?php echo sfEscape($sort); ?>"><?php endif; ?>
 
-                <!-- Categorias -->
-                <div class="sidebar-group">
-                    <span class="sidebar-group-label">Categoria</span>
-                    <div class="sidebar-chip-list">
-                        <a class="sidebar-chip <?php echo $selectedCategory === null ? 'is-active' : ''; ?>" href="<?php echo htmlspecialchars($buildCatalogUrl(1, [], ['categoria']), ENT_QUOTES, 'UTF-8'); ?>">Todo</a>
+                <div class="sf-filter-group">
+                    <span class="sf-filter-label">Categoría</span>
+                    <div class="sf-chip-list">
+                        <a class="sf-chip<?php echo $selectedCategory === null ? ' is-active' : ''; ?>" href="<?php echo sfEscape($buildCatalogUrl(1, [], ['categoria'])); ?>"<?php echo $selectedCategory === null ? ' aria-current="true"' : ''; ?>>Todo</a>
                         <?php foreach ($categories as $category): ?>
-                            <a class="sidebar-chip <?php echo (int) $category['id_categoria'] === $selectedCategory ? 'is-active' : ''; ?>" href="<?php echo htmlspecialchars($buildCatalogUrl(1, ['categoria' => (int) $category['id_categoria']], []), ENT_QUOTES, 'UTF-8'); ?>">
-                                <?php echo htmlspecialchars($category['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                <small class="sidebar-chip-count"><?php echo (int) $category['product_count']; ?></small>
+                            <?php $isActiveChip = (int) $category['id_categoria'] === $selectedCategory; ?>
+                            <a class="sf-chip<?php echo $isActiveChip ? ' is-active' : ''; ?>" href="<?php echo sfEscape($buildCatalogUrl(1, ['categoria' => (int) $category['id_categoria']], [])); ?>"<?php echo $isActiveChip ? ' aria-current="true"' : ''; ?>>
+                                <?php echo sfEscape($category['nombre']); ?>
+                                <small><?php echo (int) $category['product_count']; ?></small>
                             </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
 
-                <!-- Precio -->
-                <div class="sidebar-group">
-                    <span class="sidebar-group-label">Rango de precio</span>
-                    <div class="sidebar-price-range">
-                        <div class="sidebar-price-inputs">
-                            <div class="sidebar-price-field">
-                                <span class="sidebar-price-prefix">L/</span>
-                                <input type="number" name="precio_min" min="0" step="1" placeholder="Min" value="<?php echo $filterPriceMin !== null ? number_format($filterPriceMin, 0, '.', '') : ''; ?>" data-catalog-sidebar-apply>
-                            </div>
-                            <span class="sidebar-price-sep">-</span>
-                            <div class="sidebar-price-field">
-                                <span class="sidebar-price-prefix">L/</span>
-                                <input type="number" name="precio_max" min="0" step="1" placeholder="Max" value="<?php echo $filterPriceMax !== null ? number_format($filterPriceMax, 0, '.', '') : ''; ?>" data-catalog-sidebar-apply>
-                            </div>
-                        </div>
-                        <?php if ($priceRange['min'] > 0 || $priceRange['max'] > 0): ?>
-                            <small class="sidebar-price-hint">Rango disponible: <?php echo htmlspecialchars(appMoney((float) $priceRange['min'], 0), ENT_QUOTES, 'UTF-8'); ?> - <?php echo htmlspecialchars(appMoney((float) $priceRange['max'], 0), ENT_QUOTES, 'UTF-8'); ?></small>
-                        <?php endif; ?>
+                <fieldset class="sf-filter-group">
+                    <legend class="sf-filter-label">Rango de precio</legend>
+                    <div class="sf-price-inputs">
+                        <label class="sf-field sf-field-prefix">
+                            <span class="sf-field-prefix-text"><?php echo sfEscape(appCurrencySymbol()); ?></span>
+                            <span class="sf-visually-hidden">Precio mínimo</span>
+                            <input type="number" name="precio_min" min="0" step="1" inputmode="numeric" placeholder="Mín" value="<?php echo $filterPriceMin !== null ? number_format($filterPriceMin, 0, '.', '') : ''; ?>">
+                        </label>
+                        <span aria-hidden="true">–</span>
+                        <label class="sf-field sf-field-prefix">
+                            <span class="sf-field-prefix-text"><?php echo sfEscape(appCurrencySymbol()); ?></span>
+                            <span class="sf-visually-hidden">Precio máximo</span>
+                            <input type="number" name="precio_max" min="0" step="1" inputmode="numeric" placeholder="Máx" value="<?php echo $filterPriceMax !== null ? number_format($filterPriceMax, 0, '.', '') : ''; ?>">
+                        </label>
                     </div>
-                </div>
+                    <?php if ($priceRange['min'] > 0 || $priceRange['max'] > 0): ?>
+                        <small class="sf-filter-hint">Disponible: <?php echo sfEscape(appMoney((float) $priceRange['min'], 0)); ?> – <?php echo sfEscape(appMoney((float) $priceRange['max'], 0)); ?></small>
+                    <?php endif; ?>
+                </fieldset>
 
-                <!-- Disponibilidad -->
-                <div class="sidebar-group">
-                    <span class="sidebar-group-label">Disponibilidad</span>
-                    <label class="sidebar-toggle-label">
+                <fieldset class="sf-filter-group">
+                    <legend class="sf-filter-label">Disponibilidad</legend>
+                    <label class="sf-check">
                         <input type="checkbox" name="en_stock" value="1" <?php echo $filterInStock ? 'checked' : ''; ?> data-catalog-sidebar-checkbox>
-                        <span class="sidebar-toggle-text">Solo productos con stock</span>
+                        <span>Solo con stock</span>
                     </label>
-                    <label class="sidebar-toggle-label">
+                    <label class="sf-check">
                         <input type="checkbox" name="en_oferta" value="1" <?php echo $filterOnSale ? 'checked' : ''; ?> data-catalog-sidebar-checkbox>
-                        <span class="sidebar-toggle-text">Solo en oferta</span>
+                        <span>Solo en oferta</span>
                     </label>
-                </div>
+                </fieldset>
 
-                <button type="submit" class="button button-primary sidebar-apply-button">Aplicar filtros</button>
+                <button type="submit" class="sf-button sf-button-primary sf-button-block">Aplicar filtros</button>
+                <?php if ($activeFilters !== []): ?>
+                    <a class="sf-button sf-button-ghost sf-button-block" href="<?php echo BASE_URL; ?>/views/catalogo.php">Limpiar todo</a>
+                <?php endif; ?>
             </form>
-        </div>
+        </details>
     </aside>
 
-    <!-- =============== CONTENIDO PRINCIPAL =============== -->
-    <div class="catalog-main">
-
-        <!-- Chips de filtros activos -->
+    <div class="sf-catalog-main">
         <?php if ($activeFilters !== []): ?>
-            <div class="catalog-active-filters" role="region" aria-label="Filtros activos">
-                <span class="catalog-active-label">Filtros activos:</span>
+            <div class="sf-active-filters" role="region" aria-label="Filtros activos">
                 <?php foreach ($activeFilters as $af): ?>
-                    <a class="catalog-filter-chip" href="<?php echo htmlspecialchars($buildCatalogUrl(1, [], [$af['remove'], 'pagina']), ENT_QUOTES, 'UTF-8'); ?>" title="Quitar filtro">
-                        <?php echo htmlspecialchars($af['label'], ENT_QUOTES, 'UTF-8'); ?> &times;
+                    <a class="sf-chip sf-chip-removable" href="<?php echo sfEscape($buildCatalogUrl(1, [], [$af['remove'], 'pagina'])); ?>">
+                        <?php echo sfEscape($af['label']); ?>
+                        <span aria-hidden="true"><?php echo sfIcon('close', 'sf-icon sf-icon-xs'); ?></span>
+                        <span class="sf-visually-hidden">(quitar filtro)</span>
                     </a>
                 <?php endforeach; ?>
-                <a class="catalog-clear-link" href="<?php echo BASE_URL; ?>/views/catalogo.php">Limpiar todo</a>
+                <a class="sf-link-plain" href="<?php echo BASE_URL; ?>/views/catalogo.php">Limpiar todo</a>
             </div>
         <?php endif; ?>
 
         <?php if ($products !== []): ?>
-            <div class="catalog-results-head">
-                <h2 class="catalog-results-title">
-                    <?php if ($search !== ''): ?>
-                        Resultados para "<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"
-                    <?php else: ?>
-                        Productos encontrados
-                    <?php endif; ?>
-                </h2>
-                <div class="catalog-results-meta">
-                    <span class="catalog-summary">Mostrando <?php echo $showFrom; ?>-<?php echo $showTo; ?> de <?php echo $totalProducts; ?></span>
-                </div>
+            <div class="sf-results-meta">
+                <h2 class="sf-visually-hidden">Productos</h2>
+                <span>Mostrando <?php echo $showFrom; ?>–<?php echo $showTo; ?> de <?php echo $totalProducts; ?></span>
             </div>
-            <div class="mobile-scroll-hint">Desliza para ver más</div>
-            <div class="collection-grid catalog-grid" data-catalog-grid>
-                <?php foreach ($products as $product): ?>
-                    <?php $productImage = storefrontImageUrl($product['url_imagen'] ?? ''); ?>
-                    <?php $hasPromotion = storefrontProductHasPromotion($product); ?>
-                    <?php $discountPercent = storefrontProductDiscountPercent($product); ?>
-                    <?php $hasStock = (int) ($product['stock_actual'] ?? 0) > 0; ?>
-                    <article class="shop-card" data-reveal-card>
-                        <a class="shop-card-media" href="<?php echo BASE_URL; ?>/views/detalle_producto.php?id=<?php echo (int) $product['id_producto']; ?>">
-                            <?php if ($productImage !== ''): ?>
-                                <img src="<?php echo htmlspecialchars($productImage, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?>">
-                            <?php else: ?>
-                                <div class="shop-card-placeholder">
-                                    <span><?php echo htmlspecialchars(storefrontInitial($product['categoria_nombre']), ENT_QUOTES, 'UTF-8'); ?></span>
-                                </div>
-                            <?php endif; ?>
-                        </a>
-                        <div class="shop-card-body">
-                            <span class="shop-card-sku">SKU: <?php echo htmlspecialchars($product['codigo_producto'], ENT_QUOTES, 'UTF-8'); ?></span>
-                            <?php if ($hasPromotion): ?>
-                                <div class="storefront-promo-headline">
-                                    <span class="storefront-promo-tag"><?php echo htmlspecialchars((string) ($product['texto_promocion'] ?: 'Oferta'), ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php if ($discountPercent !== null): ?>
-                                        <span class="storefront-discount-badge">-<?php echo $discountPercent; ?>%</span>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
-                            <?php if (!$hasStock): ?>
-                                <div class="storefront-stock-badge storefront-stock-badge-inline">Proximamente</div>
-                            <?php endif; ?>
-                            <h3><a href="<?php echo BASE_URL; ?>/views/detalle_producto.php?id=<?php echo (int) $product['id_producto']; ?>" title="<?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?></a></h3>
-                            <p class="shop-card-description" title="<?php echo htmlspecialchars((string) ($product['descripcion'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(storefrontExcerpt($product['descripcion'], 96), ENT_QUOTES, 'UTF-8'); ?></p>
-                            <div class="shop-card-footer">
-                                <div class="storefront-price-stack">
-                                    <span class="shop-price"><?php echo htmlspecialchars(appMoney((float) storefrontProductCurrentPrice($product)), ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php if ($hasPromotion): ?>
-                                        <span class="shop-price-original"><?php echo htmlspecialchars(appMoney((float) $product['precio_venta']), ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php endif; ?>
-                                </div>
-                                <a class="inline-link" href="<?php echo BASE_URL; ?>/views/detalle_producto.php?id=<?php echo (int) $product['id_producto']; ?>">Ver detalle</a>
-                            </div>
-                        </div>
-                    </article>
+            <div class="sf-product-grid sf-product-grid-catalog">
+                <?php foreach ($products as $index => $product): ?>
+                    <?php echo sfRenderProductCard($product, ['index' => $index, 'eager' => $index < 4]); ?>
                 <?php endforeach; ?>
             </div>
 
-            <!-- ===== PAGINACION MEJORADA ===== -->
             <?php if ($totalPages > 1): ?>
-                <nav class="catalog-pagination" aria-label="Paginacion del catalogo">
-                    <div class="catalog-pagination-controls">
-                        <a class="catalog-page-link <?php echo $page <= 1 ? 'is-disabled' : ''; ?>"
-                           href="<?php echo $page <= 1 ? '#' : htmlspecialchars($buildCatalogUrl($page - 1), ENT_QUOTES, 'UTF-8'); ?>"
-                           <?php echo $page <= 1 ? 'aria-disabled="true" tabindex="-1"' : ''; ?>>&#8592; Anterior</a>
-
-                        <?php
-                        $windowSize = 2;
-                        $startPage = max(1, $page - $windowSize);
-                        $endPage = min($totalPages, $page + $windowSize);
-                        ?>
-                        <?php if ($startPage > 1): ?>
-                            <a class="catalog-page-link" href="<?php echo htmlspecialchars($buildCatalogUrl(1), ENT_QUOTES, 'UTF-8'); ?>">1</a>
-                            <?php if ($startPage > 2): ?><span class="catalog-page-dots">...</span><?php endif; ?>
-                        <?php endif; ?>
-
-                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-                            <a class="catalog-page-link <?php echo $i === $page ? 'is-active' : ''; ?>"
-                               href="<?php echo htmlspecialchars($buildCatalogUrl($i), ENT_QUOTES, 'UTF-8'); ?>"
-                               <?php echo $i === $page ? 'aria-current="page"' : ''; ?>><?php echo $i; ?></a>
-                        <?php endfor; ?>
-
-                        <?php if ($endPage < $totalPages): ?>
-                            <?php if ($endPage < $totalPages - 1): ?><span class="catalog-page-dots">...</span><?php endif; ?>
-                            <a class="catalog-page-link" href="<?php echo htmlspecialchars($buildCatalogUrl($totalPages), ENT_QUOTES, 'UTF-8'); ?>"><?php echo $totalPages; ?></a>
-                        <?php endif; ?>
-
-                        <a class="catalog-page-link <?php echo $page >= $totalPages ? 'is-disabled' : ''; ?>"
-                           href="<?php echo $page >= $totalPages ? '#' : htmlspecialchars($buildCatalogUrl($page + 1), ENT_QUOTES, 'UTF-8'); ?>"
-                           <?php echo $page >= $totalPages ? 'aria-disabled="true" tabindex="-1"' : ''; ?>>Siguiente &#8594;</a>
-                    </div>
-
-                    <div class="catalog-pagination-jump">
-                        <span class="catalog-page-label">Pagina <?php echo $page; ?> de <?php echo $totalPages; ?></span>
-                        <form class="catalog-jump-form" action="" method="get" data-catalog-jump-form>
-                            <?php if ($search !== ''): ?><input type="hidden" name="buscar" value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
-                            <?php if ($selectedCategory !== null && $selectedCategory > 0): ?><input type="hidden" name="categoria" value="<?php echo $selectedCategory; ?>"><?php endif; ?>
-                            <?php if ($perPage !== 24): ?><input type="hidden" name="por_pagina" value="<?php echo $perPage; ?>"><?php endif; ?>
-                            <?php if ($sort !== 'recent'): ?><input type="hidden" name="orden" value="<?php echo htmlspecialchars($sort, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
-                            <?php if ($filterPriceMin !== null): ?><input type="hidden" name="precio_min" value="<?php echo $filterPriceMin; ?>"><?php endif; ?>
-                            <?php if ($filterPriceMax !== null): ?><input type="hidden" name="precio_max" value="<?php echo $filterPriceMax; ?>"><?php endif; ?>
-                            <?php if ($filterInStock): ?><input type="hidden" name="en_stock" value="1"><?php endif; ?>
-                            <?php if ($filterOnSale): ?><input type="hidden" name="en_oferta" value="1"><?php endif; ?>
-                            <input class="catalog-jump-input" type="number" name="pagina" min="1" max="<?php echo $totalPages; ?>" value="<?php echo $page; ?>" aria-label="Ir a pagina">
-                            <button class="catalog-jump-button" type="submit">Ir</button>
-                        </form>
-                    </div>
-                </nav>
-            <?php else: ?>
-                <p class="catalog-page-label" style="text-align:center;margin-top:14px;">Pagina 1 de 1</p>
-            <?php endif; ?>
-
-        <?php else: ?>
-            <section class="store-collection compact-top">
-                <div class="collection-empty">
-                    <strong>No hay productos para los filtros seleccionados.</strong>
-                    <p>Prueba ampliando el rango de precio, quita filtros activos o busca con otro término.</p>
-                    <?php if ($activeFilters !== []): ?>
-                        <a class="button button-secondary" href="<?php echo BASE_URL; ?>/views/catalogo.php" style="margin-top:14px;display:inline-flex;">Quitar todos los filtros</a>
+                <nav class="sf-pagination" aria-label="Paginación del catálogo">
+                    <?php if ($page > 1): ?>
+                        <a class="sf-page-link sf-page-step" href="<?php echo sfEscape($buildCatalogUrl($page - 1)); ?>" rel="prev"><?php echo sfIcon('arrow-left'); ?><span>Anterior</span></a>
+                    <?php else: ?>
+                        <span class="sf-page-link sf-page-step is-disabled" aria-disabled="true"><?php echo sfIcon('arrow-left'); ?><span>Anterior</span></span>
                     <?php endif; ?>
-                </div>
-            </section>
-        <?php endif; ?>
 
-    </div><!-- /.catalog-main -->
-</div><!-- /.catalog-layout -->
+                    <?php
+                    $windowSize = 1;
+                    $startPage = max(1, $page - $windowSize);
+                    $endPage = min($totalPages, $page + $windowSize);
+                    ?>
+                    <div class="sf-page-numbers">
+                        <?php if ($startPage > 1): ?>
+                            <a class="sf-page-link" href="<?php echo sfEscape($buildCatalogUrl(1)); ?>" aria-label="Página 1">1</a>
+                            <?php if ($startPage > 2): ?><span class="sf-page-dots" aria-hidden="true">…</span><?php endif; ?>
+                        <?php endif; ?>
+                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                            <a class="sf-page-link<?php echo $i === $page ? ' is-active' : ''; ?>" href="<?php echo sfEscape($buildCatalogUrl($i)); ?>" aria-label="Página <?php echo $i; ?>"<?php echo $i === $page ? ' aria-current="page"' : ''; ?>><?php echo $i; ?></a>
+                        <?php endfor; ?>
+                        <?php if ($endPage < $totalPages): ?>
+                            <?php if ($endPage < $totalPages - 1): ?><span class="sf-page-dots" aria-hidden="true">…</span><?php endif; ?>
+                            <a class="sf-page-link" href="<?php echo sfEscape($buildCatalogUrl($totalPages)); ?>" aria-label="Página <?php echo $totalPages; ?>"><?php echo $totalPages; ?></a>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a class="sf-page-link sf-page-step" href="<?php echo sfEscape($buildCatalogUrl($page + 1)); ?>" rel="next"><span>Siguiente</span><?php echo sfIcon('arrow-right'); ?></a>
+                    <?php else: ?>
+                        <span class="sf-page-link sf-page-step is-disabled" aria-disabled="true"><span>Siguiente</span><?php echo sfIcon('arrow-right'); ?></span>
+                    <?php endif; ?>
+                </nav>
+                <p class="sf-page-status">Página <?php echo $page; ?> de <?php echo $totalPages; ?></p>
+            <?php endif; ?>
+        <?php else: ?>
+            <div class="sf-empty">
+                <strong>No encontramos productos con estos filtros.</strong>
+                <p>Prueba ampliando el rango de precio, quitando filtros o buscando con otra palabra.</p>
+                <?php if ($activeFilters !== []): ?>
+                    <a class="sf-button sf-button-primary" href="<?php echo BASE_URL; ?>/views/catalogo.php">Quitar todos los filtros</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
