@@ -1,0 +1,4 @@
+id,nombre,tipo,descripcion,horario,indicaciones,palabras
+informacion,Información y Admisión,serv,"Orientación general, registro de pacientes y entrega de fichas.",Lun–Dom · 24 horas,Entre por la puerta principal.|Camine recto hasta el final de la sala de espera.|Gire a la derecha: es el mostrador de Información.,admision registro ficha orientacion ayuda
+caja,Caja,serv,Pagos de exámenes y servicios.,Lun–Vie · 7:00–15:00,Entre por la puerta principal.|Camine recto unos pasos y gire a la izquierda.|La Caja está a su izquierda junto a la Farmacia.,pago pagar cobro
+farmacia,Farmacia,serv,Entrega de medicamentos con receta.,Lun–Dom · 7:00–19:00,Entre por la puerta principal.|Gire a la izquierda y siga por el pasillo lateral.|Pase la Caja: la Farmacia es la siguiente ventanilla.,medicina medicamentos receta pastillas

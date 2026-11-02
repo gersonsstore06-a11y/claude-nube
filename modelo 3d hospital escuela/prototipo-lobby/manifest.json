@@ -1,0 +1,9 @@
+{
+  "name": "Mapa del Lobby – Prototipo",
+  "short_name": "Mapa Lobby",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#1d4f91",
+  "lang": "es"
+}

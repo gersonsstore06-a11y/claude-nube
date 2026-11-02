@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa del Lobby – Prototipo</title>
+<meta name="theme-color" content="#1d4f91">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root {
+    --bg: #f5f7fa; --surface: #ffffff; --text: #1b2430; --muted: #5b6675;
+    --line: #d5dbe3; --accent: #1d4f91; --accent-soft: #e3ecf8;
+    --lobby: #e6e9ee; --mi: #f6d3e2; --he: #cfe0f6; --serv: #fff1c9;
+    --sala: #dff0e4; --wall: #3a4554; --route: #d1342f; --here: #d1342f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11161d; --surface: #1a212b; --text: #e6ebf1; --muted: #9aa6b5;
+      --line: #2e3845; --accent: #7fb0ef; --accent-soft: #1f2d40;
+      --lobby: #2a313b; --mi: #4f2e3d; --he: #26394f; --serv: #4a4126;
+      --sala: #23402d; --wall: #aab4c2; --route: #ff6b63; --here: #ff6b63;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); font-size: 17px; line-height: 1.45; }
+  header { background: var(--accent); color: #fff; padding: 14px 16px; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) header { color: #0d1520; } }
+  header h1 { margin: 0; font-size: 1.2rem; }
+  header p { margin: 2px 0 0; font-size: .85rem; opacity: .9; }
+  .demo { background: #fff3cd; color: #5a4300; font-size: .85rem; padding: 8px 16px; border-bottom: 1px solid #e8d48a; }
+  main { max-width: 960px; margin: 0 auto; padding: 12px 16px 40px; display: grid; gap: 14px; }
+  @media (min-width: 820px) { main { grid-template-columns: 1fr 1fr; align-items: start; } .full { grid-column: 1 / -1; } }
+  .aqui { background: var(--accent-soft); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-weight: 600; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  label { font-weight: 600; display: block; margin-bottom: 6px; }
+  input[type=search] { width: 100%; font-size: 1.05rem; padding: 12px; border-radius: 10px;
+         border: 2px solid var(--line); background: var(--bg); color: var(--text); }
+  input[type=search]:focus { outline: none; border-color: var(--accent); }
+  ul.lista { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; max-height: 330px; overflow: auto; }
+  ul.lista button { width: 100%; text-align: left; font: inherit; color: inherit; background: var(--bg);
+         border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer; display: flex; gap: 10px; align-items: center; }
+  ul.lista button[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); }
+  .dot { width: 14px; height: 14px; border-radius: 4px; flex: none; border: 1px solid var(--wall); }
+  .vacio { color: var(--muted); margin: 10px 0 0; }
+  svg { width: 100%; height: auto; display: block; }
+  svg .area rect { stroke: var(--wall); stroke-width: 1.5; cursor: pointer; }
+  svg .area text { font-size: 11px; fill: var(--text); pointer-events: none; text-anchor: middle; font-weight: 600; }
+  svg .area.sel rect { stroke: var(--route); stroke-width: 4; }
+  svg .muro { fill: none; stroke: var(--wall); stroke-width: 4; }
+  svg .ruta { fill: none; stroke: var(--route); stroke-width: 4; stroke-dasharray: 9 6; stroke-linecap: round; stroke-linejoin: round;
+         animation: avanza 1s linear infinite; }
+  @keyframes avanza { to { stroke-dashoffset: -15; } }
+  @media (prefers-reduced-motion: reduce) { svg .ruta { animation: none; } }
+  svg .aqui-pin circle { fill: var(--here); stroke: #fff; stroke-width: 3; }
+  svg .aqui-pin text { font-size: 11px; font-weight: 700; fill: var(--here); text-anchor: middle;
+         paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 10px; font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  .leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+  #detalle h2 { margin: 0 0 4px; font-size: 1.15rem; }
+  #detalle .meta { color: var(--muted); font-size: .9rem; margin: 0 0 8px; }
+  #detalle ol { margin: 6px 0 0; padding-left: 22px; }
+  #detalle .nota { font-size: .85rem; color: var(--muted); margin-top: 8px; }
+  footer { font-size: .85rem; color: var(--muted); }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>¿A dónde necesita ir?</h1>
+  <p>Mapa del Lobby · Hospital Escuela</p>
+</header>
+<div class="demo" role="note"><strong>Prototipo de demostración.</strong> La distribución, los servicios y los horarios son datos de ejemplo, no son reales.</div>
+
+<main>
+  <div id="aqui" class="aqui full" hidden></div>
+
+  <section class="card">
+    <label for="buscar">Buscar un servicio</label>
+    <input id="buscar" type="search" placeholder="Ej.: farmacia, caja, baños…" autocomplete="off">
+    <ul id="lista" class="lista" aria-live="polite"></ul>
+  </section>
+
+  <section class="card">
+    <svg id="mapa" viewBox="0 0 400 540" role="img" aria-label="Mapa del lobby">
+      <path class="muro" d="M150 500 H30 V20 H370 V500 H250"/>
+      <g id="areas"></g>
+      <polyline id="ruta" class="ruta" points=""/>
+      <g id="pin" class="aqui-pin" style="display:none"><circle r="9"/><text dy="-14">Usted está aquí</text></g>
+    </svg>
+    <div class="leyenda">
+      <span><i class="dot" style="background:var(--serv)"></i>Servicios</span>
+      <span><i class="dot" style="background:var(--sala)"></i>Espera</span>
+      <span><i class="dot" style="background:var(--lobby)"></i>Circulación</span>
+      <span><i class="dot" style="background:var(--mi)"></i>Hacia Materno Infantil</span>
+      <span><i class="dot" style="background:var(--he)"></i>Hacia Hospital Escuela</span>
+    </div>
+  </section>
+
+  <section id="detalle" class="card full" aria-live="polite">
+    <p class="vacio">Busque o toque un área del mapa para ver cómo llegar.</p>
+  </section>
+
+  <footer class="full">
+    <strong>Probar los códigos QR</strong> (cada QR abre esta página con su ubicación):
+    <a href="?aqui=entrada">Entrada</a> ·
+    <a href="?aqui=ascensores">Ascensores</a> ·
+    <a href="?aqui=pasillo-mi">Pasillo Materno Infantil</a> ·
+    <a href="?aqui=pasillo-he">Pasillo Hospital Escuela</a>
+  </footer>
+</main>
+
+<script>
+/* ---------- CONFIGURACIÓN ----------
+   Para que el personal edite los textos desde Google Sheets:
+   Archivo → Compartir → Publicar en la web → formato CSV, y pegue el enlace aquí.
+   Columnas: id,nombre,tipo,descripcion,horario,indicaciones,palabras
+   (las indicaciones se separan con "|"). Si queda vacío, se usan los datos de abajo. */
+const SHEET_CSV_URL = '';
+
+/* Geometría del mapa (coordenadas del dibujo). La ruta va: origen → punto central → área. */
+const HUB = [200, 345];
+const GEOMETRIA = {
+  'ascensores':     { r: [40, 30, 80, 80],   desdeHub: [[140,345],[140,120],[80,120],[80,110]] },
+  'escaleras':      { r: [130, 30, 60, 80],  desdeHub: [[140,345],[140,120],[160,120],[160,110]] },
+  'banos':          { r: [200, 30, 70, 80],  desdeHub: [[260,345],[260,120],[235,120],[235,110]] },
+  'trabajo-social': { r: [280, 30, 80, 80],  desdeHub: [[260,345],[260,120],[320,120],[320,110]] },
+  'farmacia':       { r: [40, 130, 90, 100], desdeHub: [[140,345],[140,185],[130,185]] },
+  'caja':           { r: [40, 240, 90, 90],  desdeHub: [[140,345],[140,285],[130,285]] },
+  'cafeteria':      { r: [270, 130, 90, 100],desdeHub: [[260,345],[260,185],[270,185]] },
+  'informacion':    { r: [270, 240, 90, 90], desdeHub: [[260,345],[260,285],[270,285]] },
+  'sala-espera':    { r: [150, 140, 100, 180], desdeHub: [[200,320]] },
+  'pasillo-mi':     { r: [40, 360, 90, 70],  desdeHub: [[140,345],[85,345],[85,360]] },
+  'pasillo-he':     { r: [270, 360, 90, 70], desdeHub: [[260,345],[315,345],[315,360]] },
+  'entrada':        { r: [150, 445, 100, 45],desdeHub: [[200,445]] },
+};
+/* Puntos donde irían pegados los QR. */
+const PUNTOS_QR = {
+  'entrada':    { nombre: 'Entrada principal', pos: [200,437], hastaHub: [[200,437],[200,345]] },
+  'ascensores': { nombre: 'Ascensores',        pos: [80,118],  hastaHub: [[80,120],[140,120],[140,345]] },
+  'pasillo-mi': { nombre: 'Pasillo hacia Materno Infantil', pos: [85,358],  hastaHub: [[85,358],[85,345]] },
+  'pasillo-he': { nombre: 'Pasillo hacia Hospital Escuela', pos: [315,358], hastaHub: [[315,358],[315,345]] },
+};
+
+/* Datos de EJEMPLO (inventados). */
+let DATOS = [
+  { id:'informacion', nombre:'Información y Admisión', tipo:'serv', horario:'Lun–Dom · 24 horas',
+    descripcion:'Orientación general, registro de pacientes y entrega de fichas.',
+    indicaciones:['Entre por la puerta principal.','Camine recto hasta el final de la sala de espera.','Gire a la derecha: es el mostrador de Información.'],
+    palabras:'admision registro ficha orientacion ayuda' },
+  { id:'caja', nombre:'Caja', tipo:'serv', horario:'Lun–Vie · 7:00–15:00',
+    descripcion:'Pagos de exámenes y servicios.',
+    indicaciones:['Entre por la puerta principal.','Camine recto unos pasos y gire a la izquierda.','La Caja está a su izquierda, junto a la Farmacia.'],
+    palabras:'pago pagar cobro' },
+  { id:'farmacia', nombre:'Farmacia', tipo:'serv', horario:'Lun–Dom · 7:00–19:00',
+    descripcion:'Entrega de medicamentos con receta.',
+    indicaciones:['Entre por la puerta principal.','Gire a la izquierda y siga por el pasillo lateral.','Pase la Caja: la Farmacia es la siguiente ventanilla.'],
+    palabras:'medicina medicamentos receta pastillas' },
+  { id:'cafeteria', nombre:'Cafetería', tipo:'serv', horario:'Lun–Sáb · 6:00–18:00',
+    descripcion:'Comida y bebidas.',
+    indicaciones:['Entre por la puerta principal.','Gire a la derecha y siga por el pasillo lateral.','Pase Información: la Cafetería está al fondo.'],
+    palabras:'comida cafe agua comer' },
+  { id:'banos', nombre:'Baños', tipo:'serv', horario:'Siempre abiertos',
+    descripcion:'Baños públicos, incluye baño accesible.',
+    indicaciones:['Entre por la puerta principal.','Rodee la sala de espera por la derecha.','Al fondo, los baños están frente a usted.'],
+    palabras:'sanitario servicio sanitarios bano' },
+  { id:'trabajo-social', nombre:'Trabajo Social', tipo:'serv', horario:'Lun–Vie · 8:00–16:00',
+    descripcion:'Apoyo social y trámites especiales.',
+    indicaciones:['Entre por la puerta principal.','Rodee la sala de espera por la derecha hasta el fondo.','Es la última puerta a la derecha.'],
+    palabras:'social apoyo tramite' },
+  { id:'ascensores', nombre:'Ascensores', tipo:'circ', horario:'Siempre',
+    descripcion:'Acceso a los pisos superiores. Ruta recomendada para sillas de ruedas.',
+    indicaciones:['Entre por la puerta principal.','Rodee la sala de espera por la izquierda hasta el fondo.','Los ascensores están en la esquina izquierda.'],
+    palabras:'elevador piso subir silla ruedas accesible' },
+  { id:'escaleras', nombre:'Escaleras', tipo:'circ', horario:'Siempre',
+    descripcion:'Acceso a los pisos superiores.',
+    indicaciones:['Entre por la puerta principal.','Rodee la sala de espera por la izquierda hasta el fondo.','Las escaleras están junto a los ascensores.'],
+    palabras:'gradas subir piso' },
+  { id:'sala-espera', nombre:'Sala de espera', tipo:'sala', horario:'Siempre',
+    descripcion:'Área de espera central del lobby.',
+    indicaciones:['Entre por la puerta principal.','La sala de espera está justo al frente.'],
+    palabras:'esperar sillas' },
+  { id:'pasillo-mi', nombre:'Hacia Materno Infantil', tipo:'mi', horario:'Siempre',
+    descripcion:'Conexión con el bloque Materno Infantil.',
+    indicaciones:['Entre por la puerta principal.','Gire a la izquierda.','Siga el pasillo marcado en rosa.'],
+    palabras:'materno infantil maternidad pediatria ninos bebe embarazo' },
+  { id:'pasillo-he', nombre:'Hacia Hospital Escuela', tipo:'he', horario:'Siempre',
+    descripcion:'Conexión con el bloque Hospital Escuela.',
+    indicaciones:['Entre por la puerta principal.','Gire a la derecha.','Siga el pasillo marcado en azul.'],
+    palabras:'hospital escuela bloque medico quirurgico consulta' },
+  { id:'entrada', nombre:'Entrada principal', tipo:'circ', horario:'Siempre',
+    descripcion:'Acceso principal desde la calle.',
+    indicaciones:['Es la puerta por la que entró desde la calle.'],
+    palabras:'salida puerta calle' },
+];
+
+const COLOR = { serv:'var(--serv)', circ:'var(--lobby)', sala:'var(--sala)', mi:'var(--mi)', he:'var(--he)' };
+const NS = 'http://www.w3.org/2000/svg';
+const $ = (s) => document.querySelector(s);
+const norm = (t) => (t || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+const params = new URLSearchParams(location.search);
+const origenId = PUNTOS_QR[params.get('aqui')] ? params.get('aqui') : null;
+let seleccion = null;
+
+function dibujarMapa() {
+  const g = $('#areas'); g.innerHTML = '';
+  for (const d of DATOS) {
+    const geo = GEOMETRIA[d.id]; if (!geo) continue;
+    const [x, y, w, h] = geo.r;
+    const a = document.createElementNS(NS, 'g');
+    a.setAttribute('class', 'area' + (seleccion === d.id ? ' sel' : ''));
+    a.setAttribute('tabindex', '0'); a.setAttribute('role', 'button'); a.setAttribute('aria-label', d.nombre);
+    const r = document.createElementNS(NS, 'rect');
+    Object.entries({ x, y, width: w, height: h, rx: 6, fill: COLOR[d.tipo] || COLOR.serv }).forEach(([k, v]) => r.setAttribute(k, v));
+    a.appendChild(r);
+    const t = document.createElementNS(NS, 'text');
+    const palabras = d.nombre.split(' ');
+    const lineas = []; let actual = '';
+    for (const p of palabras) { if ((actual + ' ' + p).trim().length > 12 && actual) { lineas.push(actual); actual = p; } else actual = (actual + ' ' + p).trim(); }
+    lineas.push(actual);
+    lineas.forEach((l, i) => {
+      const ts = document.createElementNS(NS, 'tspan');
+      ts.setAttribute('x', x + w / 2); ts.setAttribute('y', y + h / 2 + (i - (lineas.length - 1) / 2) * 13 + 4);
+      ts.textContent = l; t.appendChild(ts);
+    });
+    a.appendChild(t);
+    a.addEventListener('click', () => seleccionar(d.id));
+    a.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionar(d.id); } });
+    g.appendChild(a);
+  }
+}
+
+function dibujarRuta() {
+  const linea = $('#ruta');
+  if (!seleccion || !GEOMETRIA[seleccion]) { linea.setAttribute('points', ''); return; }
+  const origen = PUNTOS_QR[origenId || 'entrada'];
+  const pts = [...origen.hastaHub, HUB, ...GEOMETRIA[seleccion].desdeHub];
+  const limpio = pts.filter((p, i) => i === 0 || p[0] !== pts[i - 1][0] || p[1] !== pts[i - 1][1]);
+  linea.setAttribute('points', limpio.map((p) => p.join(',')).join(' '));
+}
+
+function dibujarLista() {
+  const q = norm($('#buscar').value.trim());
+  const ul = $('#lista'); ul.innerHTML = '';
+  const res = DATOS.filter((d) => !q || norm(d.nombre + ' ' + d.palabras + ' ' + d.descripcion).includes(q));
+  if (!res.length) { ul.innerHTML = '<li class="vacio">No encontramos ese servicio. Pregunte en Información.</li>'; return; }
+  for (const d of res) {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.setAttribute('aria-pressed', seleccion === d.id);
+    b.innerHTML = `<i class="dot" style="background:${COLOR[d.tipo] || COLOR.serv}"></i><span></span>`;
+    b.querySelector('span').textContent = d.nombre;
+    b.addEventListener('click', () => seleccionar(d.id, true));
+    li.appendChild(b); ul.appendChild(li);
+  }
+}
+
+function dibujarDetalle() {
+  const box = $('#detalle');
+  const d = DATOS.find((x) => x.id === seleccion);
+  if (!d) { box.innerHTML = '<p class="vacio">Busque o toque un área del mapa para ver cómo llegar.</p>'; return; }
+  box.innerHTML = '<h2></h2><p class="meta"></p><p class="desc"></p><strong>Cómo llegar</strong><ol></ol>';
+  box.querySelector('h2').textContent = d.nombre;
+  box.querySelector('.meta').textContent = 'Horario: ' + d.horario;
+  box.querySelector('.desc').textContent = d.descripcion;
+  const ol = box.querySelector('ol');
+  d.indicaciones.forEach((t) => { const li = document.createElement('li'); li.textContent = t; ol.appendChild(li); });
+  if (origenId && origenId !== 'entrada') {
+    const n = document.createElement('p'); n.className = 'nota';
+    n.textContent = 'Las indicaciones escritas parten de la entrada principal. La línea roja del mapa parte de donde usted está.';
+    box.appendChild(n);
+  }
+}
+
+function seleccionar(id, desdeLista) {
+  seleccion = id;
+  dibujarMapa(); dibujarRuta(); dibujarLista(); dibujarDetalle();
+  if (desdeLista && window.innerWidth < 820) $('#mapa').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function mostrarOrigen() {
+  if (!origenId) return;
+  const o = PUNTOS_QR[origenId];
+  const pin = $('#pin'); pin.style.display = '';
+  pin.setAttribute('transform', `translate(${o.pos[0]},${o.pos[1]})`);
+  const aviso = $('#aqui'); aviso.hidden = false;
+  aviso.textContent = '📍 Usted está en: ' + o.nombre;
+}
+
+/* Lector CSV sencillo (soporta comillas). */
+function parseCSV(texto) {
+  const filas = []; let fila = [], campo = '', comillas = false;
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto[i];
+    if (comillas) { if (c === '"' && texto[i + 1] === '"') { campo += '"'; i++; } else if (c === '"') comillas = false; else campo += c; }
+    else if (c === '"') comillas = true;
+    else if (c === ',') { fila.push(campo); campo = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && texto[i + 1] === '\n') i++; fila.push(campo); filas.push(fila); fila = []; campo = ''; }
+    else campo += c;
+  }
+  if (campo || fila.length) { fila.push(campo); filas.push(fila); }
+  const [cab, ...resto] = filas;
+  return resto.filter((f) => f.some((x) => x.trim())).map((f) => Object.fromEntries(cab.map((k, i) => [k.trim(), (f[i] || '').trim()])));
+}
+
+async function cargarHoja() {
+  if (!SHEET_CSV_URL) return;
+  try {
+    const r = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    const filas = parseCSV(await r.text());
+    const nuevos = filas.filter((f) => f.id && f.nombre).map((f) => ({ ...f, indicaciones: (f.indicaciones || '').split('|').map((s) => s.trim()).filter(Boolean) }));
+    // Combina por "id": lo que esté en la hoja reemplaza el texto guardado; lo que no esté, se conserva.
+    for (const n of nuevos) {
+      const i = DATOS.findIndex((d) => d.id === n.id);
+      if (i >= 0) DATOS[i] = { ...DATOS[i], ...n }; else DATOS.push(n);
+    }
+    if (nuevos.length) seleccionar(seleccion);
+  } catch (e) { console.warn('No se pudo leer la hoja; se usan los datos guardados.', e); }
+}
+
+$('#buscar').addEventListener('input', dibujarLista);
+mostrarOrigen();
+seleccionar(null);
+cargarHoja();
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
