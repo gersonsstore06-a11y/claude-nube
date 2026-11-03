@@ -1,0 +1,27 @@
+id,nombre,bloque,piso,acceso,fuente_original,bloque_verificado,piso_verificado,horario,ubicacion_exacta,notas
+emergencia-adultos,Emergencia adultos (Triaje),POR VERIFICAR,1,Público,Resumen recibido,,,,,
+emergencia-pediatria,Emergencia pediátrica (Triaje),POR VERIFICAR,1,Público,Resumen recibido,,,,,
+consulta-externa,Consulta Externa,POR VERIFICAR,1,Público,Resumen recibido,,,,,"¿Hay varias consultas externas (una por bloque)?"
+laboratorio,Laboratorio clínico,POR VERIFICAR,1,Público,Resumen recibido,,,,,
+banco-sangre,Banco de Sangre,POR VERIFICAR,1,Público,Resumen recibido,,,,,"Donantes y familiares lo buscan"
+radiologia,Radiología e Imágenes,POR VERIFICAR,1,Público,Resumen recibido,,,,,
+farmacia-ce,Farmacia de Consulta Externa,POR VERIFICAR,1,Público,Resumen recibido,,,,,
+morgue,Morgue,POR VERIFICAR,1,Restringido (orientar con discreción),Resumen recibido,,,,,"Mostrar solo como trámite para familiares"
+trabajo-social,Trabajo Social,POR VERIFICAR,1,Público,Resumen recibido,,,,,
+admision,Admisión,POR VERIFICAR,1,Público,Resumen recibido,,,,,
+archivo,Archivo Clínico,POR VERIFICAR,1,Personal,Resumen recibido,,,,,
+quirofanos,Quirófanos,POR VERIFICAR,2,Restringido,Resumen recibido,,,,,"Familiares: ¿dónde está la sala de espera de cirugía?"
+ceye,Central de Equipos y Esterilización (CEYE),POR VERIFICAR,2,Personal,Resumen recibido,,,,,
+farmacia-oncologica,Farmacia Oncológica,POR VERIFICAR,2,Público,Resumen recibido,,,,,
+cai,Centro de Atención Integral (CAI),POR VERIFICAR,2,Público,Resumen recibido,,,,,
+pediatria,Hospitalización Pediátrica,Materno Infantil (POR VERIFICAR),3,Visitas,Resumen recibido,,,,,
+farmacia-pediatrica,Farmacia Pediátrica,Materno Infantil (POR VERIFICAR),3,Público,Resumen recibido,,,,,
+cirugia-mujeres,Sala Cirugía A Mujeres,POR VERIFICAR,4,Visitas,Resumen recibido,,,,,
+medicina-interna,Medicina Interna,POR VERIFICAR,4,Visitas,Resumen recibido,,,,,
+aislamiento,Áreas de aislamiento,POR VERIFICAR,4,Restringido,Resumen recibido,,,,,"Dato posiblemente desactualizado (salas COVID)"
+uci-adultos,UCI Adultos,POR VERIFICAR,POR VERIFICAR,Restringido,Solo aparece en la tabla resumen,,,,,"No está en la lista por pisos"
+neonatal-intermedios,Unidad Neonatal (cuidados intermedios y básicos),POR VERIFICAR,5,Restringido,Resumen recibido,,,,,"La tabla resumen la pone en pisos 2-3"
+farmacia-dosis-unitaria,Farmacia de Dosis Unitaria,Médico Quirúrgico (POR VERIFICAR),5,Personal,Resumen recibido,,,,,
+ucin,UCI Neonatal (UCIN),POR VERIFICAR,6,Restringido,Resumen recibido,,,,,
+madres-canguro,Programa Madres Canguro,POR VERIFICAR,6,Visitas,Resumen recibido,,,,,
+aulas-posgrado,Aulas de posgrado (UNAH),POR VERIFICAR,6,Estudiantes,Resumen recibido,,,,,
