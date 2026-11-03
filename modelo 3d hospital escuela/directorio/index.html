@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Directorio por Pisos</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --surface: #ffffff; --text: #1b2430; --muted: #5b6675; --line: #d8dee6;
+    --accent: #1d4f91; --accent-soft: #e4ecf8; --ok: #1f7a45; --ok-soft: #e3f3e8;
+    --warn: #7a5a00; --warn-soft: #fff3cd; --stop: #a3261f; --stop-soft: #fbe4e2;
+    --info: #4b3a8f; --info-soft: #ece8fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10151c; --surface: #19202a; --text: #e6ebf1; --muted: #9aa6b5; --line: #2e3845;
+      --accent: #86b4f0; --accent-soft: #1f2c3e; --ok: #6fcf97; --ok-soft: #173326;
+      --warn: #f0cf6e; --warn-soft: #3a3115; --stop: #ff8a80; --stop-soft: #3d1c1a;
+      --info: #b9a8ff; --info-soft: #2a2442;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10151c; --surface: #19202a; --text: #e6ebf1; --muted: #9aa6b5; --line: #2e3845;
+    --accent: #86b4f0; --accent-soft: #1f2c3e; --ok: #6fcf97; --ok-soft: #173326;
+    --warn: #f0cf6e; --warn-soft: #3a3115; --stop: #ff8a80; --stop-soft: #3d1c1a;
+    --info: #b9a8ff; --info-soft: #2a2442;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { background: #1d4f91; color: #fff; padding: 14px 16px; }
+  header h1 { margin: 0; font-size: 1.25rem; }
+  header p { margin: 2px 0 0; font-size: .88rem; opacity: .9; }
+  .aviso { background: var(--warn-soft); color: var(--warn); font-size: .88rem; padding: 9px 16px; border-bottom: 1px solid var(--line); }
+  main { max-width: 860px; margin: 0 auto; padding: 14px 16px 40px; }
+  label.t { font-weight: 600; display: block; margin-bottom: 6px; }
+  input[type=search] { width: 100%; font-size: 1.05rem; padding: 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--text); }
+  input[type=search]:focus { outline: none; border-color: var(--accent); }
+  .filtros { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0 4px; scrollbar-width: none; }
+  .filtros button { flex: none; font: inherit; font-size: .92rem; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+  .filtros button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 600; }
+  .resumen { color: var(--muted); font-size: .88rem; margin: 8px 0 4px; }
+  h2.piso { font-size: 1rem; margin: 22px 0 8px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  h2.piso span { background: var(--accent); color: var(--surface); border-radius: 8px; padding: 2px 9px; font-size: .9rem; }
+  .lista { display: grid; gap: 8px; }
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+  details[open] { border-color: var(--accent); }
+  summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  summary::-webkit-details-marker { display: none; }
+  summary strong { display: block; }
+  summary small { color: var(--muted); font-size: .85rem; }
+  .chip { flex: none; font-size: .75rem; font-weight: 700; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+  .Público { background: var(--ok-soft); color: var(--ok); }
+  .Visitas, .Estudiantes { background: var(--info-soft); color: var(--info); }
+  .Personal, .Restringido { background: var(--stop-soft); color: var(--stop); }
+  .cuerpo { padding: 0 14px 14px; border-top: 1px solid var(--line); }
+  .cuerpo dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 12px 0 0; font-size: .95rem; }
+  .cuerpo dt { color: var(--muted); }
+  .cuerpo dd { margin: 0; }
+  .pv { color: var(--warn); font-weight: 600; }
+  .msg { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: .92rem; }
+  .msg.stop { background: var(--stop-soft); color: var(--stop); }
+  .msg.info { background: var(--accent-soft); }
+  .msg.warn { background: var(--warn-soft); color: var(--warn); }
+  .vacio { color: var(--muted); padding: 20px 0; text-align: center; }
+  footer { color: var(--muted); font-size: .82rem; margin-top: 28px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>¿Qué servicio busca?</h1>
+  <p>Directorio por pisos · Hospital Escuela</p>
+</header>
+<div class="aviso" role="note"><strong>Borrador para presentación.</strong> Bloques y pisos tomados de un resumen público <strong>sin verificar</strong>. No usar para orientar pacientes todavía.</div>
+
+<main>
+  <label class="t" for="q">Buscar</label>
+  <input id="q" type="search" placeholder="Ej.: rayos, sangre, farmacia, emergencia…" autocomplete="off">
+
+  <div class="filtros" id="filtroPiso" role="group" aria-label="Filtrar por piso"></div>
+  <div class="filtros" id="filtroPublico" role="group" aria-label="Filtrar por tipo de visitante"></div>
+
+  <p class="resumen" id="resumen"></p>
+  <div id="resultados"></div>
+
+  <footer>Datos: <code>datos/verificacion-servicios.csv</code>. Al verificar cada servicio en sitio, se actualiza esa lista y este directorio.</footer>
+</main>
+
+<script>
+/* Datos del resumen recibido. "bv" = bloque verificado (vacío = por verificar). */
+const SERVICIOS = [
+  { id:'emergencia-adultos', n:'Emergencia adultos (Triaje)', piso:1, acc:'Público', kw:'urgencia satu triaje emergencias accidente' },
+  { id:'emergencia-pediatria', n:'Emergencia pediátrica (Triaje)', piso:1, acc:'Público', kw:'urgencia ninos nino pediatria bebe' },
+  { id:'consulta-externa', n:'Consulta Externa', piso:1, acc:'Público', kw:'clinica cita especialista consulta' },
+  { id:'laboratorio', n:'Laboratorio clínico', piso:1, acc:'Público', kw:'examen examenes analisis muestra sangre orina' },
+  { id:'banco-sangre', n:'Banco de Sangre', piso:1, acc:'Público', kw:'donar donante donacion sangre' },
+  { id:'radiologia', n:'Radiología e Imágenes', piso:1, acc:'Público', kw:'rayos x radiografia ultrasonido tomografia imagen' },
+  { id:'farmacia-ce', n:'Farmacia de Consulta Externa', piso:1, acc:'Público', kw:'medicina medicamentos receta' },
+  { id:'admision', n:'Admisión', piso:1, acc:'Público', kw:'registro ingreso ficha' },
+  { id:'trabajo-social', n:'Trabajo Social', piso:1, acc:'Público', kw:'apoyo social ayuda tramite' },
+  { id:'morgue', n:'Morgue', piso:1, acc:'Restringido', kw:'fallecido defuncion difunto', discreto:true },
+  { id:'archivo', n:'Archivo Clínico', piso:1, acc:'Personal', kw:'expediente historia clinica' },
+  { id:'quirofanos', n:'Quirófanos', piso:2, acc:'Restringido', kw:'cirugia operacion sala operaciones' },
+  { id:'ceye', n:'Central de Equipos y Esterilización (CEYE)', piso:2, acc:'Personal', kw:'esterilizacion equipo' },
+  { id:'farmacia-oncologica', n:'Farmacia Oncológica', piso:2, acc:'Público', kw:'cancer oncologia quimioterapia medicina' },
+  { id:'cai', n:'Centro de Atención Integral (CAI)', piso:2, acc:'Público', kw:'cai vih atencion integral' },
+  { id:'pediatria', n:'Hospitalización Pediátrica', piso:3, acc:'Visitas', bloque:'Materno Infantil', kw:'ninos nino pediatria sala hospitalizado' },
+  { id:'farmacia-pediatrica', n:'Farmacia Pediátrica', piso:3, acc:'Público', bloque:'Materno Infantil', kw:'medicina ninos receta' },
+  { id:'cirugia-mujeres', n:'Sala Cirugía "A" Mujeres', piso:4, acc:'Visitas', kw:'cirugia mujeres sala hospitalizada' },
+  { id:'medicina-interna', n:'Medicina Interna', piso:4, acc:'Visitas', kw:'sala hospitalizado adultos' },
+  { id:'aislamiento', n:'Áreas de aislamiento', piso:4, acc:'Restringido', kw:'aislamiento infeccioso respiratorio', nota:'Dato posiblemente desactualizado.' },
+  { id:'neonatal', n:'Unidad Neonatal (cuidados intermedios y básicos)', piso:5, acc:'Restringido', kw:'recien nacido bebe neonato neonatologia', nota:'El resumen se contradice: también la ubica en pisos 2–3.' },
+  { id:'farmacia-dosis', n:'Farmacia de Dosis Unitaria', piso:5, acc:'Personal', bloque:'Médico Quirúrgico', kw:'farmacia piso' },
+  { id:'ucin', n:'UCI Neonatal (UCIN)', piso:6, acc:'Restringido', kw:'recien nacido bebe intensivo neonato' },
+  { id:'madres-canguro', n:'Programa Madres Canguro', piso:6, acc:'Visitas', kw:'canguro prematuro bebe mama' },
+  { id:'aulas', n:'Aulas de posgrado (UNAH)', piso:6, acc:'Estudiantes', kw:'clase aula estudiante unah posgrado academico' },
+  { id:'uci-adultos', n:'UCI Adultos', piso:null, acc:'Restringido', kw:'intensivo cuidados intensivos', nota:'Aparece solo en la tabla resumen, sin piso.' },
+];
+
+const norm = (t) => (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const $ = (s) => document.querySelector(s);
+let piso = 'todos', publico = 'todos';
+
+function botones(cont, opciones, actual, alCambiar) {
+  cont.innerHTML = '';
+  for (const [v, txt] of opciones) {
+    const b = document.createElement('button');
+    b.textContent = txt; b.setAttribute('aria-pressed', v === actual);
+    b.addEventListener('click', () => alCambiar(v));
+    cont.appendChild(b);
+  }
+}
+function pintarFiltros() {
+  botones($('#filtroPiso'), [['todos','Todos los pisos'],[1,'Piso 1'],[2,'Piso 2'],[3,'Piso 3'],[4,'Piso 4'],[5,'Piso 5'],[6,'Piso 6'],[null,'Sin piso']], piso, (v) => { piso = v; pintar(); });
+  botones($('#filtroPublico'), [['todos','Todos'],['paciente','Pacientes y visitas'],['estudiante','Estudiantes'],['personal','Personal']], publico, (v) => { publico = v; pintar(); });
+}
+
+function mensaje(s) {
+  if (s.discreto) return '<div class="msg info">Para trámites relacionados, consulte primero en Admisión o Trabajo Social.</div>';
+  if (s.acc === 'Restringido') return '<div class="msg stop">Acceso restringido. Familiares: pregunte en Información por la sala de espera correspondiente.</div>';
+  if (s.acc === 'Personal') return '<div class="msg stop">Uso exclusivo del personal del hospital.</div>';
+  if (s.acc === 'Visitas') return '<div class="msg info">Ingreso de visitas según horario y normas de la sala.</div>';
+  return '';
+}
+const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+function pintar() {
+  pintarFiltros();
+  const q = norm($('#q').value.trim());
+  const visibles = SERVICIOS.filter((s) => {
+    if (piso !== 'todos' && s.piso !== piso) return false;
+    if (publico === 'paciente' && !['Público','Visitas'].includes(s.acc) && !s.discreto) return false;
+    if (publico === 'estudiante' && !['Público','Visitas','Estudiantes'].includes(s.acc)) return false;
+    if (publico === 'personal' && s.acc !== 'Personal' && s.acc !== 'Restringido') return false;
+    return !q || norm(s.n + ' ' + s.kw).includes(q);
+  });
+  $('#resumen').textContent = visibles.length + (visibles.length === 1 ? ' servicio' : ' servicios');
+  const cont = $('#resultados'); cont.innerHTML = '';
+  if (!visibles.length) { cont.innerHTML = '<p class="vacio">No encontramos ese servicio. Pregunte en Información.</p>'; return; }
+  const grupos = new Map();
+  for (const s of visibles) { const k = s.piso ?? 'sin'; if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(s); }
+  for (const [k, lista] of [...grupos].sort((a, b) => (a[0] === 'sin') - (b[0] === 'sin') || a[0] - b[0])) {
+    const h = document.createElement('h2'); h.className = 'piso';
+    h.innerHTML = k === 'sin' ? '<span>?</span> Piso por confirmar' : `<span>${k}</span> Piso ${k}`;
+    cont.appendChild(h);
+    const div = document.createElement('div'); div.className = 'lista';
+    for (const s of lista) {
+      const d = document.createElement('details');
+      const bloque = s.bloque ? `${esc(s.bloque)} <span class="pv">(por verificar)</span>` : '<span class="pv">Por verificar</span>';
+      d.innerHTML = `<summary><div><strong>${esc(s.n)}</strong><small>${s.piso ? 'Piso ' + s.piso : 'Piso por confirmar'} · ${s.bloque ? esc(s.bloque) : 'bloque por verificar'}</small></div><span class="chip ${s.acc}">${s.acc}</span></summary>
+        <div class="cuerpo"><dl><dt>Bloque</dt><dd>${bloque}</dd><dt>Piso</dt><dd>${s.piso ?? '<span class="pv">Por confirmar</span>'} <span class="pv">(sin verificar)</span></dd><dt>Horario</dt><dd><span class="pv">Pendiente</span></dd></dl>
+        ${mensaje(s)}${s.nota ? `<div class="msg warn">${esc(s.nota)}</div>` : ''}</div>`;
+      div.appendChild(d);
+    }
+    cont.appendChild(div);
+  }
+}
+$('#q').addEventListener('input', pintar);
+pintar();
+</script>
+</body>
+</html>
