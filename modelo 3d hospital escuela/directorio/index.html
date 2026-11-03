@@ -10,6 +10,7 @@
     --accent: #1d4f91; --accent-soft: #e4ecf8; --ok: #1f7a45; --ok-soft: #e3f3e8;
     --warn: #7a5a00; --warn-soft: #fff3cd; --stop: #a3261f; --stop-soft: #fbe4e2;
     --info: #4b3a8f; --info-soft: #ece8fa;
+    --b-top: #eef1f5; --b-l: #d9dfe7; --b-r: #c4ccd7; --b-edge: #9aa5b3; --h-top: #6fa0e0; --h-l: #3e78c6; --h-r: #1d4f91; --d-top: #ffe9a8; --d-l: #f3d371; --d-r: #ddb948;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -17,6 +18,7 @@
       --accent: #86b4f0; --accent-soft: #1f2c3e; --ok: #6fcf97; --ok-soft: #173326;
       --warn: #f0cf6e; --warn-soft: #3a3115; --stop: #ff8a80; --stop-soft: #3d1c1a;
       --info: #b9a8ff; --info-soft: #2a2442;
+      --b-top: #2c3542; --b-l: #232b36; --b-r: #1c232c; --b-edge: #46505e; --h-top: #86b4f0; --h-l: #4f84cc; --h-r: #2f5f9f; --d-top: #6b5a24; --d-l: #574a1d; --d-r: #433915;
     }
   }
   :root[data-theme="dark"] {
@@ -24,6 +26,7 @@
     --accent: #86b4f0; --accent-soft: #1f2c3e; --ok: #6fcf97; --ok-soft: #173326;
     --warn: #f0cf6e; --warn-soft: #3a3115; --stop: #ff8a80; --stop-soft: #3d1c1a;
     --info: #b9a8ff; --info-soft: #2a2442;
+    --b-top: #2c3542; --b-l: #232b36; --b-r: #1c232c; --b-edge: #46505e; --h-top: #86b4f0; --h-l: #4f84cc; --h-r: #2f5f9f; --d-top: #6b5a24; --d-l: #574a1d; --d-r: #433915;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
@@ -62,6 +65,23 @@
   .msg.info { background: var(--accent-soft); }
   .msg.warn { background: var(--warn-soft); color: var(--warn); }
   .vacio { color: var(--muted); padding: 20px 0; text-align: center; }
+  .vista3d { margin: 12px 0 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+  .vista3d svg { width: 100%; height: auto; display: block; max-width: 420px; margin: 0 auto; }
+  .f-top { fill: var(--b-top); } .f-l { fill: var(--b-l); } .f-r { fill: var(--b-r); }
+  .vista3d polygon { stroke: var(--b-edge); stroke-width: .8; stroke-linejoin: round; }
+  .hl .f-top { fill: var(--h-top); } .hl .f-l { fill: var(--h-l); } .hl .f-r { fill: var(--h-r); }
+  .dudoso .f-top { fill: var(--d-top); } .dudoso .f-l { fill: var(--d-l); } .dudoso .f-r { fill: var(--d-r); }
+  .dudoso polygon { stroke: var(--warn); stroke-dasharray: 3 2; stroke-width: 1.2; }
+  .hl { animation: sube .9s ease-out both; }
+  @keyframes sube { from { transform: translateY(-14px); opacity: .3; } }
+  @media (prefers-reduced-motion: reduce) { .hl { animation: none; } }
+  .vista3d text { font-size: 11px; fill: var(--muted); font-weight: 600; }
+  .vista3d text.tor { fill: var(--text); font-size: 11.5px; text-anchor: middle; }
+  .vista3d text.pin { fill: var(--stop); font-weight: 700; text-anchor: middle; }
+  .vista3d circle { fill: var(--stop); stroke: var(--surface); stroke-width: 2; }
+  .leyenda3d { font-size: .8rem; color: var(--muted); text-align: center; margin: 4px 0 0; }
+  ol.pasos { margin: 12px 0 0; padding-left: 22px; } ol.pasos li { margin: 4px 0; }
+  .pasos-tit { font-weight: 700; margin-top: 12px; display: block; }
   footer { color: var(--muted); font-size: .82rem; margin-top: 28px; }
 </style>
 </head>
@@ -143,6 +163,56 @@ function mensaje(s) {
 }
 const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 
+
+/* ---------- Vista 3D esquemática (isométrica) ----------
+   Dos bloques de 6 pisos. NO es el edificio real a escala: solo muestra en qué bloque y piso está el servicio. */
+const PISOS = 6, ESC = 20, C30 = 0.866;
+const TORRES = [
+  { clave: 'Médico Quirúrgico', x: 0 },
+  { clave: 'Materno Infantil', x: 6.5 },
+];
+const iso = (x, y, z) => [(x - y) * C30 * ESC, (x + y) * 0.5 * ESC - z * ESC * 0.85];
+const pts = (arr) => arr.map((p) => iso(...p).map((v) => v.toFixed(1)).join(',')).join(' ');
+function caja(x0, y0, z0, w, d, h, clase) {
+  const x1 = x0 + w, y1 = y0 + d, z1 = z0 + h;
+  return `<g class="${clase || ''}">
+    <polygon class="f-l" points="${pts([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]])}"/>
+    <polygon class="f-r" points="${pts([[x1,y0,z0],[x1,y1,z0],[x1,y1,z1],[x1,y0,z1]])}"/>
+    <polygon class="f-top" points="${pts([[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]])}"/></g>`;
+}
+function edificio(s) {
+  let svg = '';
+  for (const t of TORRES) {
+    for (let p = 1; p <= PISOS; p++) {
+      let clase = '';
+      if (s.piso === p) clase = s.bloque ? (s.bloque === t.clave ? 'hl' : '') : 'dudoso';
+      svg += caja(t.x, 0, p - 1, 4, 3, 0.86, clase);
+    }
+    const [lx, ly] = t.x === 0 ? [-38, 84] : [102, 152];
+    svg += `<text class="tor" x="${lx}" y="${ly}">${t.clave}</text>`;
+    if (t.x === 0) for (let p = 1; p <= PISOS; p++) {
+      const [px, py] = iso(0, 3, p - 0.55);
+      svg += `<text x="${px - 26}" y="${py + 4}">P${p}</text>`;
+    }
+  }
+  svg = caja(4, 1, 0, 2.5, 1, 0.6, '') + svg; // pasillo de conexión (detrás)
+  const [ex, ey] = iso(5.2, 4.6, 0);
+  svg += `<circle cx="${ex}" cy="${ey}" r="5"/><text class="pin" x="${ex}" y="${ey + 18}">Entrada</text>`;
+  return `<svg viewBox="-100 -112 290 275" role="img" aria-label="Esquema del edificio: ${s.piso ? 'piso ' + s.piso : 'piso por confirmar'}">${svg}</svg>`;
+}
+function pasos(s) {
+  if (s.acc === 'Restringido' || s.acc === 'Personal' || s.discreto) return '';
+  const destino = esc(s.n);
+  const bloque = s.bloque ? `del bloque ${esc(s.bloque)}` : 'del bloque que le indiquen en Información';
+  const lista = s.piso === 1
+    ? [`Entre por la entrada principal ${bloque}.`, `${destino} está en la planta baja (piso 1).`, `Siga los rótulos de “${destino}” o pregunte en Información.`]
+    : s.piso
+    ? [`Entre por la entrada principal ${bloque}.`, 'Diríjase a los ascensores o las escaleras.', `Suba al <strong>piso ${s.piso}</strong>.`, `Al salir, siga los rótulos de “${destino}” o pregunte en la estación de enfermería.`]
+    : ['Pregunte en Información: la ubicación de este servicio aún no está confirmada.'];
+  return `<span class="pasos-tit">Cómo llegar</span><ol class="pasos">${lista.map((l) => `<li>${l}</li>`).join('')}</ol>
+    <p class="leyenda3d">Indicaciones generales. El recorrido dentro de cada piso se agrega cuando tengamos el croquis.</p>`;
+}
+
 function pintar() {
   pintarFiltros();
   const q = norm($('#q').value.trim());
@@ -168,7 +238,9 @@ function pintar() {
       const bloque = s.bloque ? `${esc(s.bloque)} <span class="pv">(por verificar)</span>` : '<span class="pv">Por verificar</span>';
       d.innerHTML = `<summary><div><strong>${esc(s.n)}</strong><small>${s.piso ? 'Piso ' + s.piso : 'Piso por confirmar'} · ${s.bloque ? esc(s.bloque) : 'bloque por verificar'}</small></div><span class="chip ${s.acc}">${s.acc}</span></summary>
         <div class="cuerpo"><dl><dt>Bloque</dt><dd>${bloque}</dd><dt>Piso</dt><dd>${s.piso ?? '<span class="pv">Por confirmar</span>'} <span class="pv">(sin verificar)</span></dd><dt>Horario</dt><dd><span class="pv">Pendiente</span></dd></dl>
-        ${mensaje(s)}${s.nota ? `<div class="msg warn">${esc(s.nota)}</div>` : ''}</div>`;
+        <div class="vista3d">${edificio(s)}<p class="leyenda3d">${s.bloque ? 'Azul: piso del servicio' : 'Amarillo: piso del servicio (bloque por confirmar)'} · Esquema, no a escala</p></div>
+        ${pasos(s)}${mensaje(s)}${s.nota ? `<div class="msg warn">${esc(s.nota)}</div>` : ''}</div>`;
+      if (q && visibles.length <= 3 && s === visibles[0]) d.open = true;
       div.appendChild(d);
     }
     cont.appendChild(div);
