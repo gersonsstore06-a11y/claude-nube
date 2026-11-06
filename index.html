@@ -6,8 +6,11 @@
   <title>Instituto Antonio Vidal (IAV) | Investigación en salud – Honduras</title>
   <meta name="description" content="Instituto Antonio Vidal (IAV), Tegucigalpa, Honduras. Proyectos de investigación en salud, eventos, noticias, artículos y recursos.">
   <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
+<div class="progress" aria-hidden="true"></div>
+<a href="#inicio" class="to-top" aria-label="Volver arriba">↑</a>
 
 <!-- Barra superior: redes sociales -->
 <div class="topbar">
@@ -48,18 +51,34 @@
 
   <!-- Portada -->
   <section class="hero">
-    <!-- PENDIENTE: fotografía central enviada por Katia (assets/hero.jpg). Se activa en styles.css -->
+    <!-- Ilustración provisional. Reemplazar por la fotografía enviada por Katia cuando esté disponible. -->
+    <div class="hero-bg" aria-hidden="true"></div>
     <div class="container hero-inner">
-      <h1>Instituto Antonio Vidal</h1>
-      <p class="lead">Investigación colaborativa en salud en Honduras.</p>
-      <a class="btn" href="#proyectos">Conozca nuestros proyectos</a>
+      <p class="eyebrow anim-in">Tegucigalpa, Honduras</p>
+      <h1 class="anim-in d1">Instituto Antonio Vidal</h1>
+      <p class="lead anim-in d2">Investigación colaborativa en salud en Honduras.</p>
+      <div class="anim-in d3">
+        <a class="btn" href="#proyectos">Conozca nuestros proyectos</a>
+        <a class="btn btn-ghost" href="#quienes-somos">Quiénes somos</a>
+      </div>
+    </div>
+    <a href="#cifras" class="scroll-hint" aria-label="Bajar">⌄</a>
+  </section>
+
+  <!-- Cifras (todas tomadas del resumen del proyecto ZIPH) -->
+  <section id="cifras" class="stats">
+    <div class="container stats-grid">
+      <div class="stat reveal"><span class="num" data-count="2016">2016</span><span>Inicio del proyecto ZIPH</span></div>
+      <div class="stat reveal d1"><span class="num" data-count="3">3</span><span>Sitios de estudio</span></div>
+      <div class="stat reveal d2"><span class="num" data-count="5">5</span><span>Publicaciones científicas de ZIPH</span></div>
+      <div class="stat reveal d3"><span class="num" data-count="2024">2024</span><span>Inicio de la fase ZIPH2</span></div>
     </div>
   </section>
 
   <!-- Quiénes somos -->
   <section id="quienes-somos" class="section">
     <div class="container narrow">
-      <h2>Quiénes somos</h2>
+      <h2 class="reveal">Quiénes somos</h2>
       <p class="pending">[PENDIENTE: texto institucional de “Quiénes somos”. No se recibió en la información disponible.]</p>
     </div>
   </section>
@@ -67,12 +86,12 @@
   <!-- Misión y visión -->
   <section id="mision-vision" class="section alt">
     <div class="container grid-2">
-      <div class="card">
-        <h2>Misión</h2>
+      <div class="card reveal">
+        <h2 class="reveal">Misión</h2>
         <p class="pending">[PENDIENTE: texto de la misión.]</p>
       </div>
-      <div class="card">
-        <h2>Visión</h2>
+      <div class="card reveal">
+        <h2 class="reveal">Visión</h2>
         <p class="pending">[PENDIENTE: texto de la visión.]</p>
       </div>
     </div>
@@ -81,19 +100,22 @@
   <!-- Proyectos -->
   <section id="proyectos" class="section">
     <div class="container">
-      <h2>Nuestros proyectos</h2>
+      <h2 class="reveal">Nuestros proyectos</h2>
       <div class="grid-3">
-        <article class="card">
+        <article class="card reveal">
+          <img class="card-img" src="assets/proyecto-tghn.svg" alt="">
           <h3>The Global Health Network (TGHN)</h3>
           <p class="pending">[PENDIENTE: descripción breve de la participación del IAV en TGHN.]</p>
           <a class="link-more" href="https://lac.tghn.org/actividades-y-eventos/" target="_blank" rel="noopener">Actividades y eventos de TGHN →</a>
         </article>
-        <article class="card">
+        <article class="card reveal d1">
+          <img class="card-img" src="assets/proyecto-ziph.svg" alt="">
           <h3>ZIPH2 – Cero Infecciones en el Embarazo en Honduras</h3>
           <p>Proyecto colaborativo con la Universidad de Tulane (Nueva Orleans, EE. UU.) que mide infecciones en mujeres embarazadas en su primer control prenatal, incluyendo Zika y, desde 2024, la enfermedad de Chagas.</p>
           <a class="link-more" href="#ziph">Leer más →</a>
         </article>
-        <article class="card">
+        <article class="card reveal d2">
+          <img class="card-img" src="assets/proyecto-proximo.svg" alt="">
           <h3>Próximamente</h3>
           <p class="pending">[PENDIENTE: tercer proyecto por definir.]</p>
         </article>
@@ -103,13 +125,13 @@
 
   <!-- Detalle ZIPH -->
   <section id="ziph" class="section alt">
-    <div class="container narrow">
-      <h2>ZIPH / ZIPH2</h2>
+    <div class="container narrow reveal-group">
+      <h2 class="reveal">ZIPH / ZIPH2</h2>
       <p>En el año 2016 inició el proyecto <strong>Infección por Zika durante el embarazo en Honduras</strong> (ZIPH, <em>Zika Infections in Pregnancy in Honduras</em>) con el objetivo de medir la infección de este virus entre mujeres embarazadas que asisten al primer control prenatal y asociar la infección a microcefalia y alteraciones en el neurodesarrollo de los niños nacidos expuestos al virus durante el embarazo.</p>
       <p>A partir del año 2024, este proyecto se denominó <strong>Cero Infecciones en el Embarazo en Honduras</strong> (ZIPH2, <em>Zero Infections in Pregnancy in Honduras</em>) con el objetivo de medir infecciones en mujeres embarazadas en Honduras que asisten a su primer control prenatal. En esta nueva fase se ha incluido la enfermedad de Chagas y las posibles consecuencias entre los niños nacidos de madres que resultaron positivas para la infección. Este proyecto tiene una cohorte de mujeres embarazadas con la potencialidad de medir otras infecciones y de servir como monitoreo de enfermedades emergentes; anteriormente se pudo evaluar la especificidad de las pruebas rápidas para COVID-19.</p>
       <p>Es un proyecto colaborativo entre la Universidad de Tulane, Nueva Orleans, Estados Unidos, y el Instituto Antonio Vidal, Tegucigalpa, Honduras. Los sitios de estudio están ubicados en el Hospital Escuela, el CIS Alonzo Suazo y el Hospital San Felipe.</p>
       <h3>Publicaciones del proyecto</h3>
-      <ol class="pubs">
+      <ol class="pubs reveal-group">
         <li><a href="https://reproductive-health-journal.biomedcentral.com/articles/10.1186/s12978-016-0200-6" target="_blank" rel="noopener">Protocolo de investigación (Reproductive Health)</a></li>
         <li><a href="https://pubmed.ncbi.nlm.nih.gov/33724927/" target="_blank" rel="noopener">Microcephaly Outcome among Zika-Virus Infected Pregnant Women in Honduras</a></li>
         <li><a href="https://doi.org/10.3390/tropicalmed6010005" target="_blank" rel="noopener">Measurement of Head Circumference: Implications for Microcephaly Surveillance in Zika-Infected Areas</a></li>
@@ -122,11 +144,11 @@
   <!-- Eventos -->
   <section id="eventos" class="section">
     <div class="container">
-      <h2>Próximos eventos</h2>
+      <h2 class="reveal">Próximos eventos</h2>
       <div class="grid-3">
-        <article class="card">
-          <!-- PENDIENTE: afiche de “Casos clínicos” (assets/evento-casos-clinicos.jpg) -->
-          <div class="img-placeholder">Afiche pendiente</div>
+        <article class="card reveal">
+          <!-- Imagen provisional: reemplazar por el afiche real de “Casos clínicos” -->
+          <img class="card-img" src="assets/evento-casos-clinicos.svg" alt="Casos clínicos">
           <h3>Casos clínicos</h3>
           <p class="pending">[PENDIENTE: fecha, hora, lugar y enlace de inscripción.]</p>
         </article>
@@ -137,15 +159,16 @@
   <!-- Noticias -->
   <section id="noticias" class="section alt">
     <div class="container">
-      <h2>Noticias</h2>
+      <h2 class="reveal">Noticias</h2>
       <div class="grid-3">
-        <article class="card">
-          <!-- PENDIENTE: imagen del mapa enviada por Katia (assets/noticia-mapa.jpg) -->
-          <div class="img-placeholder">Imagen pendiente (mapa)</div>
+        <article class="card reveal">
+          <!-- Imagen provisional: reemplazar por el mapa enviado por Katia -->
+          <img class="card-img" src="assets/noticia-rising.svg" alt="">
           <h3>Rising Scholars</h3>
           <a class="link-more" href="https://risingscholars.net/en/news/details/2080/" target="_blank" rel="noopener">Leer noticia →</a>
         </article>
-        <article class="card">
+        <article class="card reveal d1">
+          <img class="card-img" src="assets/noticia-datos.svg" alt="">
           <h3>Clínicas de datos abiertas: impulsando la investigación y el desarrollo de capacidades en el Hospital Escuela</h3>
           <a class="link-more" href="https://lac.tghn.org/noticias/clinicas-de-datos-abiertas-impulsando-la-investigacion-y-el-desarrollo-de-capacidades-en-el-hospital-escuela/" target="_blank" rel="noopener">Leer noticia →</a>
         </article>
@@ -157,7 +180,7 @@
   <!-- Artículos -->
   <section id="articulos" class="section">
     <div class="container narrow">
-      <h2>Artículos</h2>
+      <h2 class="reveal">Artículos</h2>
       <ul class="pubs">
         <li>
           <a href="https://camjol.info/index.php/RMH/article/view/19245/23810" target="_blank" rel="noopener">Artículo en Revista Médica Hondureña</a>
@@ -172,7 +195,7 @@
   <!-- Recursos -->
   <section id="recursos" class="section alt">
     <div class="container narrow">
-      <h2>Recursos</h2>
+      <h2 class="reveal">Recursos</h2>
       <p class="pending">[PENDIENTE: el sitio anterior tenía dos recursos subidos; no se recibió su contenido.]</p>
     </div>
   </section>
@@ -180,9 +203,9 @@
   <!-- Enlaces de interés -->
   <section id="enlaces" class="section">
     <div class="container">
-      <h2>Enlaces de interés</h2>
+      <h2 class="reveal">Enlaces de interés</h2>
       <!-- PENDIENTE: logos de cada institución (con permiso de uso). Por ahora se muestran como texto. -->
-      <ul class="links-grid">
+      <ul class="links-grid reveal-group">
         <li><a href="https://hospitalescuela.hn/" target="_blank" rel="noopener">Hospital Escuela</a></li>
         <li><a href="https://revistamedicahondurena.hn/" target="_blank" rel="noopener">Revista Médica Hondureña</a></li>
         <li><a href="https://www.colegiomedico.hn/" target="_blank" rel="noopener">Colegio Médico de Honduras</a></li>
@@ -215,14 +238,49 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Menú móvil
   const t = document.querySelector('.menu-toggle'), m = document.getElementById('menu');
-  t.addEventListener('click', () => {
-    const open = m.classList.toggle('open');
-    t.setAttribute('aria-expanded', open);
-  });
-  m.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    m.classList.remove('open'); t.setAttribute('aria-expanded', false);
-  }));
+  t.addEventListener('click', () => { const o = m.classList.toggle('open'); t.setAttribute('aria-expanded', o); });
+  m.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { m.classList.remove('open'); t.setAttribute('aria-expanded', false); }));
+
+  // Aparición al hacer scroll (elementos sueltos y grupos escalonados)
+  document.querySelectorAll('.reveal-group > *').forEach((el, i) => { el.classList.add('reveal'); el.style.transitionDelay = (i % 6) * 70 + 'ms'; });
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { const el = e.target; el.classList.add('visible'); io.unobserve(el); setTimeout(() => { el.classList.add('done'); el.style.transitionDelay = ''; }, 1200); }
+  }), { threshold: .15, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Contadores animados
+  const co = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return; co.unobserve(e.target);
+    const el = e.target, end = +el.dataset.count, start = end > 1000 ? end - 30 : 0, t0 = performance.now();
+    if (reduce) return;
+    const step = now => { const k = Math.min((now - t0) / 1400, 1), v = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(start + (end - start) * v); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }), { threshold: .6 });
+  document.querySelectorAll('[data-count]').forEach(el => co.observe(el));
+
+  // Barra de progreso, encabezado compacto, botón "arriba", parallax del hero, menú activo
+  const bar = document.querySelector('.progress'), header = document.querySelector('.header'),
+        toTop = document.querySelector('.to-top'), heroBg = document.querySelector('.hero-bg'),
+        links = [...m.querySelectorAll('a')],
+        secs = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  let ticking = false;
+  function onScroll() {
+    const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+    header.classList.toggle('compact', y > 60);
+    toTop.classList.toggle('show', y > 700);
+    if (!reduce && y < innerHeight) heroBg.style.transform = `translateY(${y * .35}px) scale(1.1)`;
+    let cur = null; secs.forEach(s => { if (s.getBoundingClientRect().top < 140) cur = s.id; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+    ticking = false;
+  }
+  addEventListener('scroll', () => { if (!ticking) { requestAnimationFrame(onScroll); ticking = true; } }, { passive: true });
+  onScroll();
 </script>
 </body>
 </html>

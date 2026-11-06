@@ -18,3 +18,7 @@ Primera versión estática (HTML + CSS, sin dependencias). Abrir `index.html` en
 ## Antes de publicar
 - Recuperar el control del dominio `institutoantoniovidal.org`, el hosting y el DNS
   (necesario también para crear los correos institucionales).
+
+## Imágenes provisionales (`assets/*.svg`)
+Ilustraciones vectoriales creadas como relleno. Reemplazar por material real:
+`hero.svg` (foto central), `evento-casos-clinicos.svg` (afiche real), `noticia-rising.svg` (mapa enviado).

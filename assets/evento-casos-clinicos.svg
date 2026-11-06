@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180">
+  <rect width="320" height="180" fill="#0b4f6c"/>
+  <g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round">
+    <path d="M70 40 V80 C70 110 120 110 120 80 V40"/>
+    <path d="M95 104 V125 C95 150 150 152 160 128"/>
+  </g>
+  <circle cx="166" cy="114" r="14" fill="none" stroke="#e07a1f" stroke-width="5"/>
+  <circle cx="70" cy="40" r="5" fill="#ffffff"/><circle cx="120" cy="40" r="5" fill="#ffffff"/>
+  <text x="200" y="82" font-family="system-ui,Arial,sans-serif" font-size="22" font-weight="700" fill="#ffffff">Casos</text>
+  <text x="200" y="110" font-family="system-ui,Arial,sans-serif" font-size="22" font-weight="700" fill="#ffd2a8">clínicos</text>
+</svg>
