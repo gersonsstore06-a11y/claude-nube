@@ -33,5 +33,13 @@ Columnas: `edificio; piso; nombre_sala; que_se_hace_ahi; horario; como_llegar_re
 - **Sin dependencia de CDN** para Three.js (`lib/three`, licencia MIT).
 - **Servidor** local solo en 127.0.0.1 y compatible con Mac/Linux.
 
+## Pasada de realismo y diseño (versión 3)
+- **Suelo propio, sin internet:** calles con aceras y línea central, césped, caminos peatonales, estacionamientos con cajones pintados y autos. La foto satelital pasó a ser opcional (botón **SAT**).
+- **Fachadas con relieve real:** columnas y cantos de losa en 3D alineados con las ventanas, marquesina con rótulo en la entrada principal, techos de losa y de lámina.
+- **Entorno:** árboles y postes instanciados (pocas llamadas de dibujo), luz más clara, viñeta y color en calidad alta.
+- **Interiores:** recintos rectos alineados con el edificio, con muros y vanos de puerta (siguen siendo ilustrativos).
+- **Interfaz nueva:** encabezado, pestañas con iconos, brújula (toque para norte arriba), tarjetas translúcidas, hoja inferior en celular y pantalla de carga.
+- Las calles, autos, árboles, caminos e interiores son **decoración generada por el programa**, no un levantamiento del sitio.
+
 ## Pendiente (requiere datos reales)
 Posiciones medidas de cada sala (`pos: [x, z]` en `datos.js`), puertas reales de cada edificio, niveles del Materno Infantil, y verificación de todo lo marcado "Por confirmar".
