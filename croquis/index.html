@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Croquis no oficial – Hospital Escuela</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #f6f6f4; color: #222; }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; }
+  .aviso { background: #fff3cd; border: 1px solid #e0c36a; padding: 8px 12px; border-radius: 6px; font-size: .9rem; margin: 8px 0 16px; }
+  .mapa { background: #fff; border: 1px solid #ccc; border-radius: 8px; max-width: 900px; }
+  svg { width: 100%; height: auto; display: block; }
+  .leyenda { font-size: .85rem; margin-top: 12px; max-width: 900px; }
+  .leyenda span { display: inline-block; margin-right: 16px; }
+  .sw { display: inline-block; width: 14px; height: 14px; vertical-align: middle; margin-right: 4px; border: 1px solid #555; }
+  .pend { max-width: 900px; font-size: .9rem; }
+</style>
+</head>
+<body>
+<h1>Croquis del Hospital Escuela (no oficial)</h1>
+<div class="aviso">
+  Croquis <strong>aproximado y sin escala</strong>, hecho a partir de observación y fotos.
+  No es un plano oficial ni sirve como plano de evacuación.
+  Las partes con línea punteada están <strong>por confirmar</strong>.
+</div>
+
+<div class="mapa">
+<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+  <defs>
+    <pattern id="techo" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#9aa" stroke-width="2"/>
+    </pattern>
+  </defs>
+
+  <!-- Brújula (orientación por confirmar) -->
+  <g transform="translate(850,50)">
+    <circle r="22" fill="#fff" stroke="#999"/>
+    <path d="M0,-18 L6,0 L0,-4 L-6,0 Z" fill="#999"/>
+    <text y="34" text-anchor="middle" font-size="10" fill="#999">N ¿?</text>
+  </g>
+
+  <!-- Edificio principal (detrás del portón) -->
+  <rect x="200" y="40" width="500" height="170" fill="#dce6f2" stroke="#4a6fa5" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="450" y="115" text-anchor="middle" font-size="16" font-weight="600" fill="#2c4a78">Edificio principal</text>
+  <text x="450" y="137" text-anchor="middle" font-size="12" fill="#2c4a78">varios pisos · fachada azul y blanca</text>
+  <text x="450" y="155" text-anchor="middle" font-size="11" fill="#2c4a78">(forma, tamaño y accesos por confirmar)</text>
+
+  <!-- Espacio interior entre portón y edificio -->
+  <rect x="140" y="210" width="620" height="140" fill="#f0f0ea" stroke="#bbb" stroke-dasharray="4 4"/>
+  <text x="450" y="285" text-anchor="middle" font-size="12" fill="#888">Área interior detrás del portón (¿patio / acceso vehicular?) – por confirmar</text>
+
+  <!-- Muro frontal -->
+  <line x1="60" y1="350" x2="840" y2="350" stroke="#777" stroke-width="6"/>
+
+  <!-- Puerta lateral izquierda -->
+  <rect x="80" y="340" width="70" height="20" fill="url(#techo)" stroke="#555"/>
+  <text x="115" y="378" text-anchor="middle" font-size="11">Puerta lateral izq.</text>
+  <text x="115" y="392" text-anchor="middle" font-size="10" fill="#888">(uso por confirmar)</text>
+
+  <!-- Portón principal -->
+  <rect x="270" y="338" width="360" height="24" fill="#b8c0c8" stroke="#444" stroke-width="2"/>
+  <line x1="450" y1="338" x2="450" y2="362" stroke="#444" stroke-width="2"/>
+  <text x="450" y="330" text-anchor="middle" font-size="14" font-weight="700" fill="#c99700">HOSPITAL ESCUELA</text>
+  <text x="450" y="380" text-anchor="middle" font-size="12">Portón principal (2 hojas metálicas grises)</text>
+  <text x="450" y="395" text-anchor="middle" font-size="10" fill="#888">¿acceso vehicular? – cerrado en la foto</text>
+
+  <!-- Acceso peatonal derecho -->
+  <rect x="660" y="336" width="110" height="28" fill="url(#techo)" stroke="#555"/>
+  <text x="715" y="382" text-anchor="middle" font-size="11" font-weight="600">Acceso peatonal der.</text>
+  <text x="715" y="396" text-anchor="middle" font-size="10" fill="#888">techo de lámina · cámara · fila de personas</text>
+  <path d="M715,440 L715,372" stroke="#2a8a3e" stroke-width="3" marker-end="url(#flecha)"/>
+  <defs>
+    <marker id="flecha" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#2a8a3e"/>
+    </marker>
+  </defs>
+
+  <!-- Explanada exterior -->
+  <rect x="60" y="410" width="780" height="100" fill="#ececec" stroke="none"/>
+  <text x="450" y="465" text-anchor="middle" font-size="12" fill="#666">Explanada de concreto (exterior)</text>
+
+  <!-- Calle -->
+  <rect x="0" y="520" width="900" height="60" fill="#555"/>
+  <text x="450" y="555" text-anchor="middle" font-size="13" fill="#fff">Calle / avenida (nombre por confirmar)</text>
+</svg>
+</div>
+
+<div class="leyenda">
+  <span><i class="sw" style="background:#dce6f2;border-color:#4a6fa5"></i>Edificio</span>
+  <span><i class="sw" style="background:#b8c0c8"></i>Portón</span>
+  <span><i class="sw" style="background:repeating-linear-gradient(45deg,#fff 0 3px,#9aa 3px 5px)"></i>Acceso techado</span>
+  <span style="color:#2a8a3e">➜ Entrada de personas (probable)</span>
+  <span>– – – Por confirmar</span>
+</div>
+
+<div class="pend">
+  <h2 style="font-size:1rem">Pendiente de confirmar</h2>
+  <ul>
+    <li>¿Por dónde entra la gente a pie: por el acceso de la derecha o por el portón?</li>
+    <li>¿Qué hay justo detrás del portón: patio, estacionamiento, o se llega directo al edificio?</li>
+    <li>¿Para qué es la puerta lateral izquierda?</li>
+    <li>Nombre de la calle y hacia dónde queda el norte.</li>
+    <li>Ubicación del lobby dentro del edificio principal.</li>
+  </ul>
+</div>
+</body>
+</html>
