@@ -41,13 +41,23 @@
 
   <!-- Edificio principal (detrás del portón) -->
   <rect x="200" y="40" width="500" height="170" fill="#dce6f2" stroke="#4a6fa5" stroke-width="2" stroke-dasharray="8 5"/>
-  <text x="450" y="115" text-anchor="middle" font-size="16" font-weight="600" fill="#2c4a78">Edificio principal</text>
-  <text x="450" y="137" text-anchor="middle" font-size="12" fill="#2c4a78">varios pisos · fachada azul y blanca</text>
-  <text x="450" y="155" text-anchor="middle" font-size="11" fill="#2c4a78">(forma, tamaño y accesos por confirmar)</text>
+  <text x="450" y="70" text-anchor="middle" font-size="16" font-weight="600" fill="#2c4a78">Edificio principal</text>
+  <text x="450" y="90" text-anchor="middle" font-size="11" fill="#2c4a78">varios pisos · forma y tamaño por confirmar</text>
+
+  <!-- Lobby (planta baja) -->
+  <rect x="330" y="110" width="240" height="100" fill="#fdf6e3" stroke="#b07d1a" stroke-width="2"/>
+  <text x="450" y="155" text-anchor="middle" font-size="14" font-weight="700" fill="#7a5410">LOBBY</text>
+  <text x="450" y="173" text-anchor="middle" font-size="10" fill="#7a5410">ver detalle abajo</text>
 
   <!-- Espacio interior entre portón y edificio -->
   <rect x="140" y="210" width="620" height="140" fill="#f0f0ea" stroke="#bbb" stroke-dasharray="4 4"/>
-  <text x="450" y="285" text-anchor="middle" font-size="12" fill="#888">Área interior detrás del portón (¿patio / acceso vehicular?) – por confirmar</text>
+  <text x="250" y="285" text-anchor="middle" font-size="11" fill="#888">Área interior</text>
+  <text x="250" y="300" text-anchor="middle" font-size="10" fill="#888">(¿patio / acceso vehicular?)</text>
+
+  <!-- Recorrido entrada → lobby (~30 pasos) -->
+  <path d="M715,345 L715,280 L450,280 L450,214" fill="none" stroke="#2a8a3e" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#flecha)"/>
+  <text x="585" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#2a8a3e">~30 pasos (≈ 20–25 m)</text>
+  <text x="585" y="300" text-anchor="middle" font-size="10" fill="#2a8a3e">punto de entrada y trazado exacto por confirmar</text>
 
   <!-- Muro frontal -->
   <line x1="60" y1="350" x2="840" y2="350" stroke="#777" stroke-width="6"/>
@@ -68,7 +78,6 @@
   <rect x="660" y="336" width="110" height="28" fill="url(#techo)" stroke="#555"/>
   <text x="715" y="382" text-anchor="middle" font-size="11" font-weight="600">Acceso peatonal der.</text>
   <text x="715" y="396" text-anchor="middle" font-size="10" fill="#888">techo de lámina · cámara · fila de personas</text>
-  <path d="M815,455 L768,370" stroke="#2a8a3e" stroke-width="3" marker-end="url(#flecha)"/>
   <defs>
     <marker id="flecha" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
       <path d="M0,0 L10,5 L0,10 Z" fill="#2a8a3e"/>
@@ -93,14 +102,88 @@
   <span>– – – Por confirmar</span>
 </div>
 
+<h2 style="font-size:1.1rem;margin-top:28px">Detalle: Lobby (planta baja)</h2>
+<p style="font-size:.85rem;max-width:900px;margin:0 0 8px">Visto desde arriba, entrando por la parte de abajo del dibujo y mirando hacia el fondo.</p>
+<div class="mapa">
+<svg viewBox="0 0 900 640" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="fl2" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#2a8a3e"/>
+    </marker>
+  </defs>
+
+  <!-- Piso del lobby -->
+  <rect x="120" y="80" width="660" height="460" fill="#f4f1ea" stroke="#555" stroke-width="4"/>
+  <text x="450" y="330" text-anchor="middle" font-size="22" font-weight="700" fill="#c9bfa8">LOBBY</text>
+  <text x="450" y="352" text-anchor="middle" font-size="11" fill="#a99f88">piso de granito · cielo falso</text>
+
+  <!-- Entrada (abajo) -->
+  <rect x="380" y="532" width="140" height="16" fill="#f4f1ea" stroke="none"/>
+  <text x="450" y="575" text-anchor="middle" font-size="12" font-weight="600" fill="#2a8a3e">Entrada (desde el exterior)</text>
+  <text x="450" y="590" text-anchor="middle" font-size="10" fill="#888">¿puerta, reja o abierto? – por confirmar</text>
+  <path d="M450,560 L450,470" stroke="#2a8a3e" stroke-width="3" marker-end="url(#fl2)"/>
+
+  <!-- Columnas -->
+  <rect x="235" y="400" width="40" height="40" fill="#cfd6dc" stroke="#555"/>
+  <text x="255" y="458" text-anchor="middle" font-size="10" fill="#555">columna</text>
+  <rect x="385" y="190" width="34" height="34" fill="#cfd6dc" stroke="#555"/>
+  <text x="402" y="240" text-anchor="middle" font-size="10" fill="#555">columna</text>
+
+  <!-- Pared derecha: Dirección Administrativa -->
+  <rect x="700" y="330" width="80" height="170" fill="#dce6f2" stroke="#4a6fa5" stroke-width="2"/>
+  <line x1="700" y1="345" x2="700" y2="485" stroke="#7fb3e0" stroke-width="6"/>
+  <text x="740" y="405" text-anchor="middle" font-size="11" font-weight="700" fill="#2c4a78">Dirección</text>
+  <text x="740" y="420" text-anchor="middle" font-size="11" font-weight="700" fill="#2c4a78">Adminis-</text>
+  <text x="740" y="435" text-anchor="middle" font-size="11" font-weight="700" fill="#2c4a78">trativa</text>
+  <text x="740" y="455" text-anchor="middle" font-size="9" fill="#2c4a78">puertas de vidrio</text>
+
+  <!-- Pared derecha: TV / tablero / celosía -->
+  <rect x="760" y="250" width="20" height="50" fill="#333"/>
+  <text x="752" y="272" text-anchor="end" font-size="10">TV y mural informativo</text>
+  <rect x="740" y="170" width="40" height="50" fill="#a0764a" stroke="#6b4b2a"/>
+  <text x="732" y="200" text-anchor="end" font-size="10">estructura de madera (¿escalera / ducto?)</text>
+
+  <!-- Pared izquierda -->
+  <rect x="120" y="290" width="12" height="70" fill="#7fb3e0"/>
+  <text x="140" y="320" font-size="10">ventana / pizarra</text>
+  <rect x="134" y="370" width="70" height="40" fill="none" stroke="#999" stroke-dasharray="3 3"/>
+  <text x="140" y="390" font-size="9" fill="#888">gente</text>
+  <text x="140" y="401" font-size="9" fill="#888">esperando</text>
+
+  <!-- Fondo izquierdo: ventanillas -->
+  <rect x="140" y="80" width="200" height="40" fill="#e8dcc6" stroke="#8a6d3b"/>
+  <text x="240" y="104" text-anchor="middle" font-size="11" font-weight="600">Ventanillas / oficina</text>
+  <text x="240" y="135" text-anchor="middle" font-size="9" fill="#888">(nombre por confirmar)</text>
+
+  <!-- Fondo: murales -->
+  <rect x="350" y="80" width="70" height="14" fill="#f2b84b"/>
+  <rect x="470" y="80" width="80" height="14" fill="#f2b84b"/>
+  <text x="450" y="70" text-anchor="middle" font-size="10" fill="#b07d1a">murales infantiles (texto no legible en la foto)</text>
+
+  <!-- Elevador -->
+  <rect x="425" y="80" width="40" height="28" fill="#c0c6cc" stroke="#333" stroke-width="2"/>
+  <text x="445" y="99" text-anchor="middle" font-size="9" font-weight="700">ELEV</text>
+  <text x="445" y="124" text-anchor="middle" font-size="10">Elevador</text>
+
+  <!-- Salida al fondo -->
+  <rect x="570" y="76" width="70" height="10" fill="#f4f1ea"/>
+  <path d="M605,110 L605,30" stroke="#2a8a3e" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#fl2)"/>
+  <text x="615" y="45" font-size="11" font-weight="600" fill="#2a8a3e">Pasillo al fondo</text>
+  <text x="615" y="60" font-size="10" fill="#888">¿hacia dónde lleva?</text>
+</svg>
+</div>
+
 <div class="pend">
   <h2 style="font-size:1rem">Pendiente de confirmar</h2>
   <ul>
-    <li>¿Por dónde entra la gente a pie: por el acceso de la derecha o por el portón?</li>
-    <li>¿Qué hay justo detrás del portón: patio, estacionamiento, o se llega directo al edificio?</li>
+    <li>¿Los ~30 pasos son desde el acceso peatonal de la derecha o desde el portón?</li>
+    <li>¿Qué hay entre la entrada y el lobby: patio abierto, pasillo techado?</li>
     <li>¿Para qué es la puerta lateral izquierda?</li>
+    <li>Lobby: nombre de las ventanillas del fondo izquierdo (¿Admisión, Archivo, Información?).</li>
+    <li>Lobby: qué dicen los murales del fondo y si hay escaleras además del elevador.</li>
+    <li>Lobby: hacia dónde lleva el pasillo del fondo a la derecha del elevador.</li>
+    <li>Lobby: qué es la estructura de madera de la derecha.</li>
     <li>Nombre de la calle y hacia dónde queda el norte.</li>
-    <li>Ubicación del lobby dentro del edificio principal.</li>
   </ul>
 </div>
 </body>
